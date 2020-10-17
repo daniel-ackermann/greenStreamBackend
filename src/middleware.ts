@@ -18,6 +18,7 @@ export function authenticate(req: Request, res: any, next: NextFunction): any {
         } catch (error) {
             return res.status(401).send("401");
         }
+    } else {
+        return res.status(401).send("401");
     }
-    return res.status(401).send("401");
 }
