@@ -5,6 +5,7 @@ import { ResultSetHeader, RowDataPacket } from 'mysql2';
 const pool = new DB().getPool();
 
 export async function getItems(req: Request, res: Response): Promise<Response> {
+
     const [rows] = await pool.query<RowDataPacket[]>("SELECT  item.id, " +
         "item.likes, " +
         "item.explanation_id, " +
@@ -14,6 +15,8 @@ export async function getItems(req: Request, res: Response): Promise<Response> {
         "item.title, " +
         "item.language, " +
         "item.simple, " +
+        "item.topic_id, " +
+        "item.type_id, " +
         "topic.name, " +
         "type.name, " +
         "type.view_external " +
