@@ -12,7 +12,7 @@ router.route("/account")
     .post(registerAccount);
 
 router.route("/login")
-    .get(authenticate, checkStatus)
+    .get(checkStatus)
     .post(signIn)
     .delete(signOut);
 
