@@ -33,6 +33,8 @@ GET         http://appsterdb.ackermann.digital:3000/login               Eingelog
 DELETE    * http://appsterdb.ackermann.digital:3000/account             Account löschen
 POST        http://appsterdb.ackermann.digital:3000/account             Account erstellen
 GET         http://appsterdb.ackermann.digital:3000/account             Passwortvergessen-Email-anfrage
+
+GET         http://appsterdb.ackermann.digital:3000/api/full            {type:[], information_data:[], topics:[]}
 ```
 
 Vorgehen:
