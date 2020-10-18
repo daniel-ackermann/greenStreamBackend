@@ -8,6 +8,7 @@ import IndexRoutes from './routes/index.routes'
 import ItemRoutes from './routes/item.routes';
 import TopicRoutes from './routes/topic.routes';
 import TypeRoutes from './routes/type.routes';
+import FullRoutes from './routes/full.routes';
 import path from 'path';
 
 export class App {
@@ -28,7 +29,7 @@ export class App {
 
     private middlewares() {
         console.log(path.resolve(__dirname, '../html'));
-        this.app.use(express.static(path.resolve(__dirname, '../html')));
+        this.app.use(express.static(path.resolve(__dirname, '../html'), { maxAge: 31557600000 }));
         this.app.use(morgan('dev'));
         this.app.use(express.json());
         this.app.use(function (req, res, next) {
@@ -46,6 +47,7 @@ export class App {
         this.app.use('/api/items', ItemRoutes);
         this.app.use('/api/topics', TopicRoutes);
         this.app.use('/api/types', TypeRoutes);
+        this.app.use('/api/full', FullRoutes);
     }
 
     async listen(): Promise<void> {
