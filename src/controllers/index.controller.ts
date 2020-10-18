@@ -1,12 +1,13 @@
 import { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import ResponseWithUser, { User } from '../interface/user'
+import { User } from '../interface/user'
 import * as nodemailer from 'nodemailer';
 import TokenService from '../services/token.service';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import 'dotenv/config'
 import DB from '../lib/db';
+import { hasValidToken } from '../middleware';
 const pool = new DB().getPool();
 
 
@@ -34,7 +35,12 @@ export function indexWelcome(req: Request, res: Response): Response {
 }
 
 export function checkStatus(req: Request, res: Response): Response {
-    return res.status(200).send("true");
+    const authHeader = req.cookies.jwt;
+    if (authHeader && hasValidToken(authHeader)) {
+        return res.status(200).json(true);
+    } else {
+        return res.status(200).json(false);
+    }
 }
 
 export async function registerAccount(req: Request, res: Response): Promise<Response> {
@@ -48,7 +54,7 @@ export async function registerAccount(req: Request, res: Response): Promise<Resp
     const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM user WHERE email = ?;', [user.email]);
     if (rows.length > 0) {
         console.log("Nutzer existiert bereits");
-        return res.status(403).send("Account existiert bereits!");
+        return res.status(403).json("Account existiert bereits!");
     }
     await pool.execute('INSERT INTO user (`username`, `password`, `email`, `role`) VALUES (?, ?, ?, ?);', [user.username, passwordHash.toString(), user.email, user.role]).catch(err => {
         console.log(err);
@@ -78,16 +84,16 @@ export async function signIn(req: Request, res: Response): Promise<Response> {
     if (rows.length == 1 && await bcrypt.compare(user.password, rows[0].password)) {
         const accessToken = jwt.sign({ email: user.email, role: user.role }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: "6 hours" });
         const expire = new Date(new Date().getTime() + 1000 * 60 * 60 * 6);
-        res.cookie('jwt', accessToken, { expires: expire });
-        return res.sendStatus(200);
+        res.cookie('jwt', accessToken, { expires: expire, sameSite: "lax" });
+        return res.json(200);
     } else {
-        return res.status(403).send("Username or password incorrect");
+        return res.status(403).json("Username or password incorrect");
     }
 }
 
 export async function signOut(req: Request, res: Response): Promise<Response> {
     res.cookie("jwt", "", { expires: new Date() });
-    return res.sendStatus(200);
+    return res.json(200);
 }
 
 export async function sendEmail(req: Request, res: Response): Promise<Response> {
