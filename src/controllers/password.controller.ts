@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import path from "path";
 import TokenService from "../services/token.service";
-import DB from '../lib/db'
+import pool from '../lib/db'
 import bcrypt from 'bcryptjs'
-const pool = new DB().getPool();
+
 const tokenService = new TokenService();
 
 export async function passwordRestoreRequest(req: Request, res: Response): Promise<Response | void> {
@@ -16,13 +16,7 @@ export async function passwordRestoreRequest(req: Request, res: Response): Promi
     }
 }
 
-export async function passwordRestore(req: Request, res: Response): Promise<Response> {
-    const token = tokenService.valid(req.cookies.tk as string);
-    if (token.valid) {
-        const passwordHash = await bcrypt.hash(req.body.password, 10);
-        await pool.execute(`UPDATE user SET password=? WHERE email=?`, [passwordHash.toString(), token.owner]);
-        return res.send("Erfolgreich gespeichert!");
-    } else {
-        return res.send("Ein Fehler ist aufgetreten!");
-    }
+export async function saveNewPassword(password: string, owner: string) {
+    const passwordHash = await bcrypt.hash(password, 10);
+    await pool.execute(`UPDATE user SET password=? WHERE email=?`, [passwordHash.toString(), owner]);
 }
