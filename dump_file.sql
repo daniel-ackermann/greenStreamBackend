@@ -1,3 +1,10 @@
+Alter table item add reviewed BOOL;
+Alter table item add reviewed_by_id int DEFAULT NULL;
+Alter table item add created_by_id int;
+
+
+
+
 -- MySQL dump 10.13  Distrib 8.0.21, for Linux (x86_64)
 --
 -- Host: localhost    Database: appster
@@ -35,6 +42,9 @@ CREATE TABLE `item` (
   `topic_id` int NOT NULL DEFAULT '1',
   `language` text,
   `simple` int DEFAULT '0',
+  `created_by_id` int NOT NULL,
+  `reviewed` BOOL DEFAULT 0,
+  `reviewed_by_id` int DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=133 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -49,6 +59,7 @@ DROP TABLE IF EXISTS `topic`;
 CREATE TABLE `topic` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
+  `language` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -59,7 +70,7 @@ CREATE TABLE `topic` (
 
 LOCK TABLES `topic` WRITE;
 /*!40000 ALTER TABLE `topic` DISABLE KEYS */;
-INSERT INTO `topic` VALUES (1,'Lebensmittel'),(2,'Klimawandel'),(3,'Faire Kleidung'),(4,'Grüne Energie'),(5,'Reisen'),(6,'Zero Waste'),(7,'Unternehmertum'),(8,'Secondhand'),(9,'Transport'),(10,'Fortbewegung'),(11,'International'),(12,'Sustainable Development Goal'),(13,'Umweltverschmutzung'),(14,'Tipps für den Alltag');
+INSERT INTO `topic` VALUES (1,'Lebensmittel', 'de'),(2,'Klimawandel', 'de'),(3,'Faire Kleidung', 'de'),(4,'Grüne Energie', 'de'),(5,'Reisen', 'de'),(6,'Zero Waste', 'de'),(7,'Unternehmertum', 'de'),(8,'Secondhand', 'de'),(9,'Transport', 'de'),(10,'Fortbewegung', 'de'),(11,'International', 'de'),(12,'Sustainable Development Goal', 'de'),(13,'Umweltverschmutzung', 'de'),(14,'Tipps für den Alltag', 'de');
 /*!40000 ALTER TABLE `topic` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -74,6 +85,7 @@ CREATE TABLE `type` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `view_external` int DEFAULT NULL,
+  `language` varchar(10) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -84,7 +96,7 @@ CREATE TABLE `type` (
 
 LOCK TABLES `type` WRITE;
 /*!40000 ALTER TABLE `type` DISABLE KEYS */;
-INSERT INTO `type` VALUES (1,'Artikel',0),(2,'Video',1),(3,'Zeitschrift',0),(4,'Produkt',0),(5,'App',1),(6,'Onlineshop',0);
+INSERT INTO `type` VALUES (1,'Artikel',0,'de'),(2,'Video',1,'de'),(3,'Zeitschrift',0,'de'),(4,'Produkt',0,'de'),(5,'App',1,'de'),(6,'Onlineshop',0,'de');
 /*!40000 ALTER TABLE `type` ENABLE KEYS */;
 UNLOCK TABLES;
 

@@ -6,16 +6,16 @@ import * as nodemailer from 'nodemailer';
 import TokenService from '../services/token.service';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import 'dotenv/config'
-import DB from '../lib/db';
+import pool from '../lib/db';
 import { hasValidToken } from '../middleware';
-const pool = new DB().getPool();
+import { cookieToken } from '../interface/cookieToken';
+import { token } from 'morgan';
 
 
-// import DB from '../lib/db';
-// const pool = new DB().getPool();
+// import pool from '../lib/db';
 // pool.query(...);
 // oder:
-// import DB from '../lib/db';
+// import pool from '../lib/db';
 // DB.pool.query('asd', []);
 
 
@@ -34,13 +34,17 @@ export function indexWelcome(req: Request, res: Response): Response {
     return res.json('Welcome to the Api');
 }
 
-export function checkStatus(req: Request, res: Response): Response {
+export async function checkStatus(req: Request, res: Response): Promise<Response> {
     const authHeader = req.cookies.jwt;
-    if (authHeader && hasValidToken(authHeader)) {
-        return res.status(200).json(true);
-    } else {
-        return res.status(200).json(false);
+    if (authHeader) {
+        const token: false|cookieToken = hasValidToken(authHeader);
+        if(token != false){
+            return res.status(200).json(
+                await getUser(token.email)
+            );
+        }
     }
+    return res.status(200).json(false);    
 }
 
 export async function registerAccount(req: Request, res: Response): Promise<Response> {
@@ -62,30 +66,26 @@ export async function registerAccount(req: Request, res: Response): Promise<Resp
     return res.sendStatus(200);
 }
 
-export async function deleteAccount(req: Request, res: any): Promise<Response> {
-    try {
-        const [rows] = await (await pool.query<ResultSetHeader>('DELETE FROM user WHERE email = ?;', [res.token.email]));
+export async function deleteAccount(email:string, token: cookieToken): Promise<boolean> {
+    console.log(email);
+    if(email == token.email || token.role == "admin"){
+        const [rows] = await (await pool.query<ResultSetHeader>('DELETE FROM user WHERE email = ?;', [token.email]));
         if (rows.affectedRows == 1) {
-            return res.sendStatus(200);
-        }
-        return res.sendStatus(500);
-    } catch (e) {
-        throw {
-            error: e,
-            message: "deleteAccount error"
+            return true;
         }
     }
+    return false;
 }
 
 export async function signIn(req: Request, res: Response): Promise<Response> {
     const user: User = req.body as User;
-    // const emailHash =  bcrypt.hashSync(user.email, 10);
     const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM user WHERE email = ?;', [user.email]);
-    if (rows.length == 1 && await bcrypt.compare(user.password, rows[0].password)) {
+    if (rows.length == 1 && rows[0].email == user.email && await bcrypt.compare(user.password, rows[0].password)) {
         const accessToken = jwt.sign({ email: user.email, role: user.role }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: "6 hours" });
         const expire = new Date(new Date().getTime() + 1000 * 60 * 60 * 6);
         res.cookie('jwt', accessToken, { expires: expire, sameSite: "lax" });
-        return res.json(200);
+        delete rows[0].password;
+        return res.json(rows[0]);
     } else {
         return res.status(403).json("Username or password incorrect");
     }
@@ -108,7 +108,7 @@ export async function sendEmail(req: Request, res: Response): Promise<Response> 
         to: req.query.user as string,
         subject: 'Passwort vergessen: Greenstream Project',
         text: 'Hier sollte jetzt ein toller Link sein mit dem du dein Passwort zurück setzten können solltest...\n',
-        html: `<a href="http://localhost:3000/passwordRestore?token=${token}">http://localhost:3000/passwordRestore?token=${token}</a>"`
+        html: `<a href="http://appsterdb.ackermann.digital:3000/passwordRestore?token=${token}">http://appsterdb.ackermann.digital:3000/passwordRestore?token=${token}</a>"`
     };
     transporter.sendMail(mailOptions, function (error: Error | null, info: any) {
         if (error) {
@@ -119,4 +119,9 @@ export async function sendEmail(req: Request, res: Response): Promise<Response> 
     });
 
     return res.status(200).send("200");
+}
+
+async function getUser(email: string): Promise<RowDataPacket>{
+    const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM user WHERE email = ?;', [email]);
+    return rows[0];
 }
