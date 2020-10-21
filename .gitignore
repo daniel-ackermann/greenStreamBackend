@@ -3,3 +3,6 @@ node_modules
 build
 .env
 credentials
+server.cert
+server.key
+html/index.html
