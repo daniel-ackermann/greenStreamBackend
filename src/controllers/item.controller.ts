@@ -25,12 +25,8 @@ export async function getItems(lang?: string): Promise<RowDataPacket[]> {
         "WHERE " +
         "item.topic_id = topic.id " +
         "AND item.type_id = type.id " +
-        "AND ( item.language LIKE ? ";
-    for (let i = 1; i < languages.length; i++) {
-        sql += "OR item.language LIKE ? ";
-    }
-    sql += ');';
-    const [rows] = await pool.query<RowDataPacket[]>(sql, languages);
+        "AND item.language IN (?);";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [languages]);
     return rows;
 }
 

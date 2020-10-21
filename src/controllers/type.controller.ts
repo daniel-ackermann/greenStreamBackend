@@ -30,12 +30,8 @@ export async function getTypes(language?: string): Promise<RowDataPacket[]> {
         "type.view_external " +
         "FROM " +
         "type " +
-        "WHERE ( language LIKE ? ";
-    for (let i = 1; i < languages.length; i++) {
-        sql += "OR language LIKE ? ";
-    }
-    sql += ');';
-    const [rows] = await pool.query<RowDataPacket[]>(sql, languages);
+        "WHERE language IN (?) ";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [languages]);
     return rows;
 }
 

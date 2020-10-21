@@ -13,7 +13,7 @@ export function parseLanguage(lang: string = "de"): string[] {
     let pairs = lang.split(',');
     let result = [];
     for (let i in pairs) {
-        result.push(pairs[i].split(';')[0].split('-')[0] + "%");
+        result.push(pairs[i].split(';')[0].split('-')[0]);
     }
     // remove duplicates
     return [... new Set(result)];
