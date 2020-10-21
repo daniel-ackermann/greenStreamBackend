@@ -9,6 +9,7 @@ import ItemRoutes from './routes/item.routes';
 import TopicRoutes from './routes/topic.routes';
 import TypeRoutes from './routes/type.routes';
 import FullRoutes from './routes/full.routes';
+import UserRoutes from './routes/user.routes';
 import path from 'path';
 
 export class App {
@@ -48,6 +49,7 @@ export class App {
         this.app.use('/api/topics', TopicRoutes);
         this.app.use('/api/types', TypeRoutes);
         this.app.use('/api/full', FullRoutes);
+        this.app.use("/api/user", UserRoutes);
     }
 
     async listen(): Promise<void> {
