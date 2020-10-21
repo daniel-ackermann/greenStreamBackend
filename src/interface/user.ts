@@ -7,8 +7,3 @@ export interface User {
     email: string;
     role: string;
 }
-
-export default interface ResponseWithUser extends Response {
-    token: cookieToken;
-}
-
