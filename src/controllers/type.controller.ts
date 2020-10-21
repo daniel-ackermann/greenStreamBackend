@@ -1,8 +1,9 @@
 import { Request, Response } from 'express'
 import { RowDataPacket } from 'mysql2';
-import DB from '../lib/db'
+import pool from '../lib/db'
 import { Item } from '../interface/item'
-const pool = new DB().getPool();
+import { parseLanguage } from '../lib/helper';
+
 
 export async function getType(req: Request, res: Response): Promise<Response> {
     const [rows] = await pool.query<RowDataPacket[]>("SELECT  type.id, " +
@@ -22,13 +23,20 @@ export async function addType(req: Request, res: Response): Promise<Response> {
     });
 }
 
-export async function getTypes(req: Request, res: Response): Promise<Response> {
-    const [rows] = await pool.query<RowDataPacket[]>("SELECT  type.id, " +
+export async function getTypes(language?: string): Promise<RowDataPacket[]> {
+    let languages = parseLanguage(language);
+    let sql = "SELECT  type.id, " +
         "type.name, " +
         "type.view_external " +
         "FROM " +
-        "type;");
-    return res.json(rows);
+        "type " +
+        "WHERE ( language LIKE ? ";
+    for (let i = 1; i < languages.length; i++) {
+        sql += "OR language LIKE ? ";
+    }
+    sql += ');';
+    const [rows] = await pool.query<RowDataPacket[]>(sql, languages);
+    return rows;
 }
 
 export async function deleteType(req: Request, res: Response): Promise<Response> {

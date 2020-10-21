@@ -1,11 +1,15 @@
-import { Router } from 'express'
+import { Request, Response, Router } from 'express'
 import { getType, getTypes, addType, deleteType, updateType } from '../controllers/type.controller'
 import { authenticate } from '../middleware';
 
 const router = Router();
 
 router.route("/")
-    .get(getTypes);
+    .get(async (req: Request, res: Response) => {
+        return res.json(
+            await getTypes(req.headers["accept-language"])
+        )
+    });
 
 router.route("/:typeId")
     .get(authenticate, getType)
