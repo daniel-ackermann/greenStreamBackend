@@ -1,11 +1,15 @@
-import { Router } from 'express'
+import { Request, Response, Router } from 'express'
 import { getTopic, getTopics, addTopic, deleteTopic, updateTopic } from '../controllers/topic.controller'
 import { authenticate } from '../middleware';
 
 const router = Router();
 
 router.route("/")
-    .get(getTopics);
+    .get(async (req: Request, res: Response) => {
+        res.json(
+            await getTopics(req.headers["accept-language"])
+        );
+    });
 
 router.route("/:topicId")
     .get(authenticate, getTopic)
