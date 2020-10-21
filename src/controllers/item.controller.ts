@@ -1,12 +1,11 @@
-import { Request, Response } from 'express'
-import DB from '../lib/db'
+import pool from '../lib/db'
 import { Item } from '../interface/item'
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
-const pool = new DB().getPool();
+import { parseLanguage } from '../lib/helper';
 
-export async function getItems(req: Request, res: Response): Promise<Response> {
-
-    const [rows] = await pool.query<RowDataPacket[]>("SELECT  item.id, " +
+export async function getItems(lang?: string): Promise<RowDataPacket[]> {
+    let languages = parseLanguage(lang);
+    let sql = "SELECT  item.id, " +
         "item.likes, " +
         "item.explanation_id, " +
         "item.url, " +
@@ -25,24 +24,52 @@ export async function getItems(req: Request, res: Response): Promise<Response> {
         "type " +
         "WHERE " +
         "item.topic_id = topic.id " +
-        "AND item.type_id = type.id;");
-    return res.json(rows);
+        "AND item.type_id = type.id " +
+        "AND ( item.language LIKE ? ";
+    for (let i = 1; i < languages.length; i++) {
+        sql += "OR item.language LIKE ? ";
+    }
+    sql += ');';
+    const [rows] = await pool.query<RowDataPacket[]>(sql, languages);
+    return rows;
 }
 
-export async function addItem(req: Request, res: Response) {
-    storeItem(req.body).then(data => {
-        return res.json(data);
-    });
+// email oder id?
+export async function getItemsByUser(userId: number): Promise<RowDataPacket[]>{
+    let sql = "SELECT  item.id, " +
+        "item.likes, " +
+        "item.explanation_id, " +
+        "item.url, " +
+        "item.url, " +
+        "item.description, " +
+        "item.title, " +
+        "item.language, " +
+        "item.simple, " +
+        "item.topic_id, " +
+        "item.type_id, " +
+        "topic.name, " +
+        "type.name, " +
+        "type.view_external " +
+        "FROM item, " +
+        "topic, " +
+        "type " +
+        "WHERE " +
+        "item.topic_id = topic.id " +
+        "AND item.type_id = type.id " +
+        "AND item.created_by_id = ?";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId]);
+    return rows;
 }
 
-export async function storeItem(data: Item): Promise<Item> {
-    const [rows] = await pool.query<ResultSetHeader>('INSERT INTO item SET ?', [data]);
-    data.id = rows.insertId;
-    return data;
+export async function getReviewedItemsByUser(){}
+
+export async function addItem(item: Item): Promise<Item> {
+    const [rows] = await pool.query<ResultSetHeader>('INSERT INTO item SET ?', [item]);
+    item.id = rows.insertId;
+    return item;
 }
 
-export async function getItem(req: Request, res: Response): Promise<Response> {
-    const id = req.params.itemId;
+export async function getItem(id: number): Promise<RowDataPacket[]> {
     const [rows] = await pool.query<RowDataPacket[]>("SELECT     item.id, " +
         "item.likes, " +
         "item.explanation_id, " +
@@ -63,22 +90,15 @@ export async function getItem(req: Request, res: Response): Promise<Response> {
         "item.topic_id = topic.id " +
         "AND item.type_id = type.id " +
         "AND item.id = ?", [id]);
-    return res.json(rows);
+    return rows;
 }
 
-export async function deleteItem(req: Request, res: Response): Promise<Response> {
-    const id = req.params.itemId;
-    await pool.query('DELETE FROM item WHERE item.id = ?', [id]);
-    return res.json({
-        message: 'Item deleted'
-    });
+export async function deleteItem(id: number): Promise<ResultSetHeader> {
+    const [result] = await pool.execute<ResultSetHeader>('DELETE FROM item WHERE item.id = ?', [id]);
+    return result;
 }
 
-export async function updateItem(req: Request, res: Response): Promise<Response> {
-    const id = req.params.itemId;
-    const updateItem: Item = req.body as Item;
-    await pool.query('UPDATE item set ? WHERE id = ?', [updateItem, id]);
-    return res.json({
-        message: 'Item Updated'
-    });
+export async function updateItem(id: number, updateItem: Item): Promise<ResultSetHeader> {
+    const [result] = await pool.query<ResultSetHeader>('UPDATE item set ? WHERE id = ?', [updateItem, id]);
+    return result;
 }
