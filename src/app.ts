@@ -2,6 +2,9 @@ import express, { Application } from 'express';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
+import fs from 'fs';
+import path from 'path';
+
 // Routes
 import ImportRoutes from './routes/import.routes';
 import IndexRoutes from './routes/index.routes'
@@ -10,26 +13,40 @@ import TopicRoutes from './routes/topic.routes';
 import TypeRoutes from './routes/type.routes';
 import FullRoutes from './routes/full.routes';
 import UserRoutes from './routes/user.routes';
-import path from 'path';
+import * as http from 'http';
+import * as https from 'https';
+import { Server } from 'http';
+import { prototype } from 'module';
+// import { Server } from 'https';
 
 export class App {
-    app: Application;
+    app: Application = express();
+    // private httpServer: Server;
+    // private httpsServer: Server;
 
     constructor(
-        private port?: number | string
+        private port: number | string,
+        private secPort: number | string
     ) {
-        this.app = express();
-        this.settings();
         this.middlewares();
         this.routes();
     }
 
-    private settings() {
-        this.app.set('port', this.port || process.env.PORT || 3000);
-    }
-
     private middlewares() {
         console.log(path.resolve(__dirname, '../html'));
+        
+        this.app.use((req, res, next) => {
+            if (process.env.PROD === 'true') {
+                console.log(req.protocol);
+                if (req.protocol !== 'https') {
+                    return res.redirect('https://' + (req.headers.host || 'appsterdb.ackermann.digital').split(':')[0] + req.url);
+                } else {
+                    return next();
+                }
+            } else {
+                return next();
+            }
+        });
         this.app.use(express.static(path.resolve(__dirname, '../html'), { maxAge: 31557600000 }));
         this.app.use(morgan('dev'));
         this.app.use(express.json());
@@ -50,11 +67,17 @@ export class App {
         this.app.use('/api/types', TypeRoutes);
         this.app.use('/api/full', FullRoutes);
         this.app.use("/api/user", UserRoutes);
+        this.app.use((req, res, next) => {
+            res.redirect('/index.html');
+        })
     }
 
     async listen(): Promise<void> {
-        await this.app.listen(this.app.get('port'));
-        console.log('Server on port', this.app.get('port'));
+        var privateKey = fs.readFileSync(process.env.KEY_PATH as string);
+        var certificate = fs.readFileSync(process.env.CERT_PATH as string);
+        var credentials = { key: privateKey, cert: certificate };
+        http.createServer(this.app).listen(this.port || process.env.PORT || 3000);
+        https.createServer(credentials, this.app).listen(this.secPort || process.env.PORT || 443);
     }
 
 }
