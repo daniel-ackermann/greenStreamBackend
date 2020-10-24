@@ -37,14 +37,14 @@ export function indexWelcome(req: Request, res: Response): Response {
 export async function checkStatus(req: Request, res: Response): Promise<Response> {
     const authHeader = req.cookies.jwt;
     if (authHeader) {
-        const token: false|cookieToken = hasValidToken(authHeader);
-        if(token != false){
+        const token: false | cookieToken = hasValidToken(authHeader);
+        if (token != false) {
             return res.status(200).json(
                 await getUser(token.email)
             );
         }
     }
-    return res.status(200).json(false);    
+    return res.status(200).json(false);
 }
 
 export async function registerAccount(req: Request, res: Response): Promise<Response> {
@@ -66,9 +66,9 @@ export async function registerAccount(req: Request, res: Response): Promise<Resp
     return res.sendStatus(200);
 }
 
-export async function deleteAccount(email:string, token: cookieToken): Promise<boolean> {
+export async function deleteAccount(email: string, token: cookieToken): Promise<boolean> {
     console.log(email);
-    if(email == token.email || token.role == "admin"){
+    if (email == token.email || token.role == "admin") {
         const [rows] = await (await pool.query<ResultSetHeader>('DELETE FROM user WHERE email = ?;', [token.email]));
         if (rows.affectedRows == 1) {
             return true;
@@ -83,7 +83,7 @@ export async function signIn(req: Request, res: Response): Promise<Response> {
     if (rows.length == 1 && rows[0].email == user.email && await bcrypt.compare(user.password, rows[0].password)) {
         const accessToken = jwt.sign({ email: user.email, role: user.role }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: "6 hours" });
         const expire = new Date(new Date().getTime() + 1000 * 60 * 60 * 6);
-        res.cookie('jwt', accessToken, { expires: expire, sameSite: "lax" });
+        res.cookie('jwt', accessToken, { expires: expire, sameSite: "lax", secure: true, httpOnly: true });
         delete rows[0].password;
         return res.json(rows[0]);
     } else {
@@ -92,7 +92,7 @@ export async function signIn(req: Request, res: Response): Promise<Response> {
 }
 
 export async function signOut(req: Request, res: Response): Promise<Response> {
-    res.cookie("jwt", "", { expires: new Date() });
+    res.cookie("jwt", "", { expires: new Date(), httpOnly: true });
     return res.json(200);
 }
 
@@ -121,7 +121,7 @@ export async function sendEmail(req: Request, res: Response): Promise<Response> 
     return res.status(200).send("200");
 }
 
-async function getUser(email: string): Promise<RowDataPacket>{
+async function getUser(email: string): Promise<RowDataPacket> {
     const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM user WHERE email = ?;', [email]);
     return rows[0];
 }
