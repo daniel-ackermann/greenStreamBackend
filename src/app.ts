@@ -33,11 +33,8 @@ export class App {
     }
 
     private middlewares() {
-        console.log(path.resolve(__dirname, '../html'));
-        
         this.app.use((req, res, next) => {
             if (process.env.PROD === 'true') {
-                console.log(req.protocol);
                 if (req.protocol !== 'https') {
                     return res.redirect('https://' + (req.headers.host || 'appsterdb.ackermann.digital').split(':')[0] + req.url);
                 } else {
@@ -53,6 +50,7 @@ export class App {
         this.app.use(function (req, res, next) {
             res.header('Access-Control-Allow-Origin', req.headers.origin);
             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            res.header("Access-Control-Allow-Methods", "*");
             next();
         });
         this.app.use(bodyParser.urlencoded({ extended: true }));
@@ -67,8 +65,8 @@ export class App {
         this.app.use('/api/types', TypeRoutes);
         this.app.use('/api/full', FullRoutes);
         this.app.use("/api/user", UserRoutes);
-        this.app.use((req, res, next) => {
-            res.redirect('/index.html');
+        this.app.all('/*', (req, res) => {
+            res.sendFile('/index.html', { root: path.resolve(__dirname, '../html') });
         })
     }
 
