@@ -14,6 +14,7 @@ export async function getItems(lang?: string): Promise<RowDataPacket[]> {
         "item.title, " +
         "item.language, " +
         "item.simple, " +
+        "item.reviewed, " +
         "item.topic_id, " +
         "item.type_id, " +
         "topic.name, " +
@@ -41,6 +42,7 @@ export async function getItemsByUser(userId: number): Promise<RowDataPacket[]>{
         "item.title, " +
         "item.language, " +
         "item.simple, " +
+        "item.reviewed, " +
         "item.topic_id, " +
         "item.type_id, " +
         "topic.name, " +
@@ -57,7 +59,32 @@ export async function getItemsByUser(userId: number): Promise<RowDataPacket[]>{
     return rows;
 }
 
-export async function getReviewedItemsByUser(){}
+export async function getReviewedItemsByUser(userId: number){
+    let sql = "SELECT  item.id, " +
+        "item.likes, " +
+        "item.explanation_id, " +
+        "item.url, " +
+        "item.url, " +
+        "item.description, " +
+        "item.title, " +
+        "item.language, " +
+        "item.simple, " +
+        "item.reviewed, " +
+        "item.topic_id, " +
+        "item.type_id, " +
+        "topic.name, " +
+        "type.name, " +
+        "type.view_external " +
+        "FROM item, " +
+        "topic, " +
+        "type " +
+        "WHERE " +
+        "item.topic_id = topic.id " +
+        "AND item.type_id = type.id " +
+        "AND item.reviewed_by_id = ?";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId]);
+    return rows;
+}
 
 export async function addItem(item: Item): Promise<Item> {
     const [rows] = await pool.query<ResultSetHeader>('INSERT INTO item SET ?', [item]);
@@ -75,6 +102,7 @@ export async function getItem(id: number): Promise<RowDataPacket[]> {
         "item.title, " +
         "item.language, " +
         "item.simple, " +
+        "item.reviewed, " +
         "item.type_id, " +
         "item.topic_id, " +
         "topic.name, " +

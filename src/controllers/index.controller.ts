@@ -52,7 +52,8 @@ export async function registerAccount(req: Request, res: Response): Promise<Resp
         username: req.body.username || "",
         password: req.body.password || "",
         email: req.body.email,
-        role: req.body.role
+        role: req.body.role,
+        id: req.body.id || 0
     }
     const passwordHash = bcrypt.hashSync(user.password, 10);
     const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM user WHERE email = ?;', [user.email]);
@@ -79,9 +80,13 @@ export async function deleteAccount(email: string, token: cookieToken): Promise<
 
 export async function signIn(req: Request, res: Response): Promise<Response> {
     const user: User = req.body as User;
-    const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM user WHERE email = ?;', [user.email]);
+    const [rows] = await pool.query<RowDataPacket[]>('SELECT username, password, id, email, role, language FROM user WHERE email = ?;', [user.email]);
     if (rows.length == 1 && rows[0].email == user.email && await bcrypt.compare(user.password, rows[0].password)) {
-        const accessToken = jwt.sign({ email: user.email, role: user.role }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: "6 hours" });
+        const accessToken = jwt.sign({
+            email: user.email,
+            role: user.role,
+            id: rows[0].id
+        }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: "6 hours" });
         const expire = new Date(new Date().getTime() + 1000 * 60 * 60 * 6);
         res.cookie('jwt', accessToken, { expires: expire, sameSite: "lax", secure: true, httpOnly: true });
         delete rows[0].password;
@@ -122,6 +127,6 @@ export async function sendEmail(req: Request, res: Response): Promise<Response> 
 }
 
 async function getUser(email: string): Promise<RowDataPacket> {
-    const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM user WHERE email = ?;', [email]);
+    const [rows] = await pool.query<RowDataPacket[]>('SELECT username, id, email, role, language FROM user WHERE email = ?;', [email]);
     return rows[0];
 }
