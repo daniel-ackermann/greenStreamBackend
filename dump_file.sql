@@ -127,4 +127,20 @@ CREATE TABLE `user` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-10-12 19:44:09
+DROP TABLE IF EXISTS `user_data`;
+Create TABLE `user_data` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `userId` int NOT NULL,
+    `itemId` int,
+    `liked` int,
+    `watched` int,
+    `onWatchLaterList` int
+)
+
+CREATE TABLE `information_feedback` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `information_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `feedback` varchar(256) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id` (`information_id`),
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4_general_ci;

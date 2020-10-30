@@ -13,6 +13,7 @@ import TopicRoutes from './routes/topic.routes';
 import TypeRoutes from './routes/type.routes';
 import FullRoutes from './routes/full.routes';
 import UserRoutes from './routes/user.routes';
+import FeedbackRoutes from './routes/feedback.routes';
 import * as http from 'http';
 import * as https from 'https';
 import { Server } from 'http';
@@ -65,6 +66,7 @@ export class App {
         this.app.use('/api/types', TypeRoutes);
         this.app.use('/api/full', FullRoutes);
         this.app.use("/api/user", UserRoutes);
+        this.app.use("/api/feedback", FeedbackRoutes);
         this.app.all('/*', (req, res) => {
             res.sendFile('/index.html', { root: path.resolve(__dirname, '../html') });
         })
