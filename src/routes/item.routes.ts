@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express'
 import { request } from 'http';
 import { resolve } from 'path';
-import { getItems, addItem, getItem, deleteItem, updateItem, getReviewedItemsByUser, getItemsByUser } from '../controllers/item.controller'
+import { getItems, addItem, getItem, deleteItem, updateItem, getReviewedItemsByUser, getItemsByUser, getItemsToReview, reviewItem } from '../controllers/item.controller'
 import { Item } from '../interface/item';
 import { authenticate } from '../middleware';
 
@@ -23,6 +23,20 @@ router.route('/reviewed')
             await getReviewedItemsByUser(parseInt(req.token.id, 10))
         );
     });
+
+router.route('/review')
+    .get(async (req: Request, res: Response) => {
+        res.json(
+            await getItemsToReview()
+        );
+    })
+
+router.route('/review/:id')
+    .get(authenticate, async (req: Request, res: Response) => {
+        res.json(
+            await reviewItem(parseInt(req.params.id), parseInt(req.token.id, 10))
+        );
+    })
 
 router.route('/created')
     .get(authenticate, async (req: Request, res: Response) => {

@@ -81,9 +81,37 @@ export async function getReviewedItemsByUser(userId: number){
         "WHERE " +
         "item.topic_id = topic.id " +
         "AND item.type_id = type.id " +
+        "AND item.reviewed = 1";
         "AND item.reviewed_by_id = ?";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId]);
     return rows;
+}
+
+export async function getItemsToReview(): Promise<RowDataPacket[]> {
+    let sql = "SELECT  item.id, " +
+        "item.likes, " +
+        "item.explanation_id, " +
+        "item.url, " +
+        "item.url, " +
+        "item.description, " +
+        "item.title, " +
+        "item.language, " +
+        "item.simple, " +
+        "item.reviewed, " +
+        "item.topic_id, " +
+        "item.type_id, " +
+        "topic.name, " +
+        "type.name, " +
+        "type.view_external " +
+        "FROM item, " +
+        "topic, " +
+        "type " +
+        "WHERE " +
+        "item.topic_id = topic.id " +
+        "AND item.type_id = type.id " +
+        "AND item.reviewed = 0";
+    const [row] = await pool.query<RowDataPacket[]>(sql);
+    return row;
 }
 
 export async function addItem(item: Item): Promise<Item> {
@@ -124,5 +152,12 @@ export async function deleteItem(id: number): Promise<ResultSetHeader> {
 
 export async function updateItem(id: number, updateItem: Item): Promise<ResultSetHeader> {
     const [result] = await pool.query<ResultSetHeader>('UPDATE item set ? WHERE id = ?', [updateItem, id]);
+    return result;
+}
+
+export async function reviewItem(id:number, userId:number) {
+    const [result, row] = await pool.execute<RowDataPacket[]>('UPDATE item set reviewed=1, reviewed_by_id=? WHERE id = ?', [userId, id]);
+    console.log(result);
+    console.log(row);
     return result;
 }
