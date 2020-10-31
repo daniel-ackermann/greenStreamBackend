@@ -13,6 +13,7 @@ router.route('/')
         return res.json(data);
     })
     .post(authenticate, async (req: Request, res: Response) => {
+        req.body.created_by_id = req.token.id;
         const data = await addItem(req.body as Item)
         return res.json(data);
     });
