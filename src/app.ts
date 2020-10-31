@@ -14,16 +14,12 @@ import TypeRoutes from './routes/type.routes';
 import FullRoutes from './routes/full.routes';
 import UserRoutes from './routes/user.routes';
 import FeedbackRoutes from './routes/feedback.routes';
+import LanguageRoutes from './routes/language.routes';
 import * as http from 'http';
 import * as https from 'https';
-import { Server } from 'http';
-import { prototype } from 'module';
-// import { Server } from 'https';
 
 export class App {
     app: Application = express();
-    // private httpServer: Server;
-    // private httpsServer: Server;
 
     constructor(
         private port: number | string,
@@ -67,15 +63,16 @@ export class App {
         this.app.use('/api/full', FullRoutes);
         this.app.use("/api/user", UserRoutes);
         this.app.use("/api/feedback", FeedbackRoutes);
+        this.app.use("/api/languages", LanguageRoutes);
         this.app.all('/*', (req, res) => {
             res.sendFile('/index.html', { root: path.resolve(__dirname, '../html') });
         })
     }
 
     async listen(): Promise<void> {
-        var privateKey = fs.readFileSync(process.env.KEY_PATH as string);
-        var certificate = fs.readFileSync(process.env.CERT_PATH as string);
-        var credentials = { key: privateKey, cert: certificate };
+        const privateKey = fs.readFileSync(process.env.KEY_PATH as string);
+        const certificate = fs.readFileSync(process.env.CERT_PATH as string);
+        const credentials = { key: privateKey, cert: certificate };
         http.createServer(this.app).listen(this.port || process.env.PORT || 3000);
         https.createServer(credentials, this.app).listen(this.secPort || process.env.PORT || 443);
     }
