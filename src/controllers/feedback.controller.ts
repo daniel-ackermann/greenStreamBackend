@@ -20,13 +20,13 @@ export async function getFeedbacks(): Promise<RowDataPacket[]> {
     return row;
 }
 
-export async function getFeedback(id:number) {
+export async function getFeedback(id:number): Promise<RowDataPacket[]> {
     const sql = `SELECT * FROM information_feedback where id=?;`;
     const [row] = await pool.query<RowDataPacket[]>(sql, [id]);
     return row;
 }
 
-export async function getFeedbackByItem(id:number) {
+export async function getFeedbackByItem(id:number): Promise<RowDataPacket[]> {
     const sql = `SELECT * FROM information_feedback WHERE information_id=?;`;
     const [row] = await pool.query<RowDataPacket[]>(sql, [id]);
     return row;

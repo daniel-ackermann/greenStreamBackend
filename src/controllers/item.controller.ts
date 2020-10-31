@@ -4,8 +4,8 @@ import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { parseLanguage } from '../lib/helper';
 
 export async function getItems(lang?: string): Promise<RowDataPacket[]> {
-    let languages = parseLanguage(lang);
-    let sql = "SELECT  item.id, " +
+    const languages = parseLanguage(lang);
+    const sql = "SELECT  item.id, " +
         "item.likes, " +
         "item.explanation_id, " +
         "item.url, " +
@@ -35,7 +35,7 @@ export async function getItems(lang?: string): Promise<RowDataPacket[]> {
 
 // email oder id?
 export async function getItemsByUser(userId: number): Promise<RowDataPacket[]>{
-    let sql = "SELECT  item.id, " +
+    const sql = "SELECT  item.id, " +
         "item.likes, " +
         "item.explanation_id, " +
         "item.url, " +
@@ -62,9 +62,8 @@ export async function getItemsByUser(userId: number): Promise<RowDataPacket[]>{
     return rows;
 }
 
-export async function getReviewedItemsByUser(userId: number){
-    console.log("reviewItems", userId);
-    let sql = "SELECT  item.id, " +
+export async function getReviewedItemsByUser(userId: number): Promise<RowDataPacket[]>{
+    const sql = "SELECT  item.id, " +
         "item.likes, " +
         "item.explanation_id, " +
         "item.url, " +
@@ -93,7 +92,7 @@ export async function getReviewedItemsByUser(userId: number){
 }
 
 export async function getItemsToReview(): Promise<RowDataPacket[]> {
-    let sql = "SELECT  item.id, " +
+    const sql = "SELECT  item.id, " +
         "item.likes, " +
         "item.explanation_id, " +
         "item.url, " +
@@ -160,9 +159,7 @@ export async function updateItem(id: number, updateItem: Item): Promise<ResultSe
     return result;
 }
 
-export async function reviewItem(id:number, userId:number) {
-    const [result, row] = await pool.execute<RowDataPacket[]>('UPDATE item set reviewed=1, reviewed_by_id=? WHERE id = ?', [userId, id]);
-    console.log(result);
-    console.log(row);
+export async function reviewItem(id:number, userId:number): Promise<RowDataPacket[]> {
+    const [result] = await pool.execute<RowDataPacket[]>('UPDATE item set reviewed=1, reviewed_by_id=? WHERE id = ?', [userId, id]);
     return result;
 }

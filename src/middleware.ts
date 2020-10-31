@@ -3,8 +3,7 @@ import "dotenv/config"
 import { Response, NextFunction, Request } from "express";
 import { cookieToken } from "./interface/cookieToken";
 
-export function authenticate(req: Request, res: Response, next: NextFunction){
-    
+export function authenticate(req: Request, res: Response, next: NextFunction): void|Response{
     const authHeader = req.cookies.jwt;
     req.token = hasValidToken(authHeader);
     if (authHeader &&  req.token != false ) {

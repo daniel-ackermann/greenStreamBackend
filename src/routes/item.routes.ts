@@ -1,6 +1,4 @@
 import { Request, Response, Router } from 'express'
-import { request } from 'http';
-import { resolve } from 'path';
 import { getItems, addItem, getItem, deleteItem, updateItem, getReviewedItemsByUser, getItemsByUser, getItemsToReview, reviewItem } from '../controllers/item.controller'
 import { Item } from '../interface/item';
 import { authenticate } from '../middleware';

@@ -9,7 +9,6 @@ import 'dotenv/config'
 import pool from '../lib/db';
 import { hasValidToken } from '../middleware';
 import { cookieToken } from '../interface/cookieToken';
-import { token } from 'morgan';
 
 
 // import pool from '../lib/db';
@@ -29,10 +28,6 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_AUTH_PASS
     }
 });
-
-export function indexWelcome(req: Request, res: Response): Response {
-    return res.json('Welcome to the Api');
-}
 
 export async function checkStatus(req: Request, res: Response): Promise<Response> {
     const authHeader = req.cookies.jwt;
@@ -68,7 +63,6 @@ export async function registerAccount(req: Request, res: Response): Promise<Resp
 }
 
 export async function deleteAccount(email: string, token: cookieToken): Promise<boolean> {
-    console.log(email);
     if (email == token.email || token.role == "admin") {
         const [rows] = await (await pool.query<ResultSetHeader>('DELETE FROM user WHERE email = ?;', [token.email]));
         if (rows.affectedRows == 1) {
