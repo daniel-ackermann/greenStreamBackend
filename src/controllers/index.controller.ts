@@ -84,7 +84,7 @@ export async function signIn(req: Request, res: Response): Promise<Response> {
     if (rows.length == 1 && rows[0].email == user.email && await bcrypt.compare(user.password, rows[0].password)) {
         const accessToken = jwt.sign({
             email: user.email,
-            role: user.role,
+            role: rows[0].role,
             id: rows[0].id
         }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: "6 hours" });
         const expire = new Date(new Date().getTime() + 1000 * 60 * 60 * 6);
