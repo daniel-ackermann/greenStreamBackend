@@ -1,6 +1,7 @@
 import { Request, Response, Router } from 'express'
-import { getItems, addItem, getItem, deleteItem, updateItem, getReviewedItemsByUser, getItemsByUser, getItemsToReview, reviewItem, getLikedItems, getWatchListItems, getWatchedItems } from '../controllers/item.controller'
+import { getItems, addItem, getItem, deleteItem, updateItem, getReviewedItemsByUser, getItemsByUser, getItemsToReview, reviewItem, getLikedItems, getWatchListItems, getWatchedItems, updateStatus } from '../controllers/item.controller'
 import { Item } from '../interface/item';
+import { UserData } from '../interface/userdata';
 import { authenticate } from '../middleware';
 
 const router = Router();
@@ -63,6 +64,12 @@ router.route('/watchlist')
         return res.json(
             await getWatchListItems(parseInt(req.token.id, 10))
         )
+    })
+
+router.route('/status')
+    .post(authenticate, async(req: Request, res: Response) => {
+        updateStatus(parseInt(req.token.id, 10), req.body as UserData)
+        return res.json(200)
     })
 
 router.route('/:itemId')
