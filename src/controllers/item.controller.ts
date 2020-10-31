@@ -62,6 +62,24 @@ export async function getItemsByUser(userId: number): Promise<RowDataPacket[]>{
     return rows;
 }
 
+export async function getLikedItems(id:number): Promise<RowDataPacket[]> {
+    const sql = "SELECT * FROM item, user_data WHERE user_data.user_id=? AND user_data.itemId = item.id AND user_data.liked=1;";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [id]);
+    return rows;
+}
+
+export async function getWatchedItems(id:number): Promise<RowDataPacket[]> {
+    const sql = "SELECT * FROM item, user_data WHERE user_data.user_id=? AND user_data.itemId = item.id AND user_data.watched=1;";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [id]);
+    return rows;
+}
+
+export async function getWatchListItems(id:number): Promise<RowDataPacket[]> {
+    const sql = "SELECT * FROM item, user_data WHERE user_data.user_id=? AND user_data.item_id = item.id AND user_data.watchlist=1;";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [id]);
+    return rows;
+}
+
 export async function getReviewedItemsByUser(userId: number): Promise<RowDataPacket[]>{
     const sql = "SELECT  item.id, " +
         "item.likes, " +

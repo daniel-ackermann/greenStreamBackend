@@ -1,5 +1,5 @@
 import { Request, Response, Router } from 'express'
-import { getItems, addItem, getItem, deleteItem, updateItem, getReviewedItemsByUser, getItemsByUser, getItemsToReview, reviewItem } from '../controllers/item.controller'
+import { getItems, addItem, getItem, deleteItem, updateItem, getReviewedItemsByUser, getItemsByUser, getItemsToReview, reviewItem, getLikedItems, getWatchListItems, getWatchedItems } from '../controllers/item.controller'
 import { Item } from '../interface/item';
 import { authenticate } from '../middleware';
 
@@ -41,6 +41,27 @@ router.route('/created')
     .get(authenticate, async (req: Request, res: Response) => {
         return res.json(
             await getItemsByUser(parseInt(req.token.id, 10))
+        )
+    })
+
+router.route('/liked')
+    .get(authenticate, async (req: Request, res: Response) => {
+        return res.json(
+            await getLikedItems(parseInt(req.token.id, 10))
+        )
+    })
+
+router.route('/watched')
+    .get(authenticate, async (req: Request, res: Response) => {
+        return res.json(
+            await getWatchedItems(parseInt(req.token.id, 10))
+        )
+    })
+
+router.route('/watchlist')
+    .get(authenticate, async (req: Request, res: Response) => {
+        return res.json(
+            await getWatchListItems(parseInt(req.token.id, 10))
         )
     })
 
