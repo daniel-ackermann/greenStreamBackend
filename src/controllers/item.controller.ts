@@ -29,7 +29,8 @@ export async function getItems(lang?: string): Promise<RowDataPacket[]> {
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
         "LEFT JOIN user_data ON user_data.item_id = item.id " +
-        "WHERE item.language IN (?);";
+        "WHERE item.language IN (?) " +
+        "AND item.reviewed = 1 ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [languages]);
     return rows;
 }
@@ -58,7 +59,8 @@ export async function getItemsByUser(userId: number): Promise<RowDataPacket[]>{
         "INNER JOIN type ON type.id = item.type_id " +
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "LEFT JOIN user_data ON user_data.item_id = item.id " +
-        "AND item.created_by_id = ?;";
+        "AND item.created_by_id = ? " +
+        "AND item.reviewed = 1 ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId]);
     return rows;
 }
@@ -134,7 +136,7 @@ export async function getItemsToReview(): Promise<RowDataPacket[]> {
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
         "LEFT JOIN user_data ON user_data.item_id = item.id " +
-        "WHERE item.reviewed=0;";
+        "WHERE item.reviewed IS NULL;";
     const [row] = await pool.query<RowDataPacket[]>(sql);
     return row;
 }
