@@ -1,9 +1,10 @@
 import pool from '../lib/db'
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
+import { Feedback } from '../interface/feedback';
 
-export async function addFeedback(informationId: number, feedback: string): Promise<ResultSetHeader> {
+export async function addFeedback(feedback: Feedback): Promise<ResultSetHeader> {
     const sql = `INSERT INTO information_feedback SET ?`;
-    const [rows] = await pool.query<ResultSetHeader>(sql, [informationId, feedback]);
+    const [rows] = await pool.query<ResultSetHeader>(sql, [feedback]);
     return rows;
 }
 

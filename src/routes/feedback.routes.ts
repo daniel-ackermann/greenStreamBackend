@@ -6,12 +6,10 @@ import { authenticate } from '../middleware';
 const router = Router();
 
 router.route('')
-    .post(async (req: Request, res: Response) => {
+    .post(authenticate, async (req: Request, res: Response) => {
+        req.body.created_by_id = req.token.id;
         return res.json(
-            await addFeedback(
-                parseInt(req.body.id),
-                req.body.feedback
-            )
+            await addFeedback(req.body)
         );
     })
     .get(async (req: Request, res: Response) => {
