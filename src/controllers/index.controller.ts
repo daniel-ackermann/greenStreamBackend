@@ -74,7 +74,7 @@ export async function deleteAccount(email: string, token: cookieToken): Promise<
 
 export async function signIn(req: Request, res: Response): Promise<Response> {
     const user: User = req.body as User;
-    const [rows] = await pool.query<RowDataPacket[]>('SELECT username, password, id, email, role, language FROM user WHERE email = ?;', [user.email]);
+    const [rows] = await pool.query<RowDataPacket[]>('SELECT username, password, id, email, role, language, show_in_app, notification_time, topics, UNIX_TIMESTAMP(last_change) * 1000 as last_change FROM user WHERE email = ?;', [user.email]);
     if (rows.length == 1 && rows[0].email == user.email && await bcrypt.compare(user.password, rows[0].password)) {
         const accessToken = jwt.sign({
             email: user.email,
