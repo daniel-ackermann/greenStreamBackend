@@ -15,6 +15,7 @@ export async function getItems(lang?: string): Promise<RowDataPacket[]> {
         "item.language, " +
         "item.simple, " +
         "item.reviewed, " +
+        "item.created_by_id, " +
         "item.topic_id, " +
         "item.type_id, " +
         "topic.name, " +
@@ -25,6 +26,7 @@ export async function getItems(lang?: string): Promise<RowDataPacket[]> {
         "type " +
         "WHERE " +
         "item.topic_id = topic.id " +
+        "AND item.reviewed = 1 " +
         "AND item.type_id = type.id " +
         "AND item.language IN (?);";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [languages]);
@@ -43,6 +45,7 @@ export async function getItemsByUser(userId: number): Promise<RowDataPacket[]>{
         "item.language, " +
         "item.simple, " +
         "item.reviewed, " +
+        "item.created_by_id, " +
         "item.topic_id, " +
         "item.type_id, " +
         "topic.name, " +
@@ -60,6 +63,7 @@ export async function getItemsByUser(userId: number): Promise<RowDataPacket[]>{
 }
 
 export async function getReviewedItemsByUser(userId: number){
+    console.log("reviewItems", userId);
     let sql = "SELECT  item.id, " +
         "item.likes, " +
         "item.explanation_id, " +
@@ -70,6 +74,7 @@ export async function getReviewedItemsByUser(userId: number){
         "item.language, " +
         "item.simple, " +
         "item.reviewed, " +
+        "item.created_by_id, " +
         "item.topic_id, " +
         "item.type_id, " +
         "topic.name, " +
@@ -81,7 +86,7 @@ export async function getReviewedItemsByUser(userId: number){
         "WHERE " +
         "item.topic_id = topic.id " +
         "AND item.type_id = type.id " +
-        "AND item.reviewed = 1";
+        "AND item.reviewed = 1 " +
         "AND item.reviewed_by_id = ?";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId]);
     return rows;
