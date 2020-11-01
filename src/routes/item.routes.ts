@@ -67,13 +67,14 @@ router.route('/watchlist')
     })
 
 router.route('/status')
-    .post(authenticate, async(req: Request, res: Response) => {
+    .post(authenticate, async (req: Request, res: Response) => {
         updateStatus(parseInt(req.token.id, 10), req.body as UserData)
         return res.json(200)
     })
 
 router.route('/:itemId')
-    .get(async (req: Request, res: Response) => {
+    .get(authenticate, async (req: Request, res: Response) => {
+        updateStatus(req.token.id, { item_id: parseInt(req.params.itemId, 10), watched: true });
         return res.json(
             await getItem(
                 parseInt(req.params.itemId) || 0
