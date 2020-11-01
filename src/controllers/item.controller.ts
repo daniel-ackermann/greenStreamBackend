@@ -36,7 +36,7 @@ export async function getItems(lang?: string): Promise<RowDataPacket[]> {
 }
 
 // email oder id?
-export async function getItemsByUser(userId: number): Promise<RowDataPacket[]>{
+export async function getItemsByUser(userId: number): Promise<RowDataPacket[]> {
     const sql = "SELECT  item.id, " +
         "item.explanation_id, " +
         "item.url, " +
@@ -59,31 +59,31 @@ export async function getItemsByUser(userId: number): Promise<RowDataPacket[]>{
         "INNER JOIN type ON type.id = item.type_id " +
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "LEFT JOIN user_data ON user_data.item_id = item.id " +
-        "AND item.created_by_id = ? " +
+        "WHERE item.created_by_id = ? " +
         "AND item.reviewed = 1 ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId]);
     return rows;
 }
 
-export async function getLikedItems(id:number): Promise<RowDataPacket[]> {
+export async function getLikedItems(id: number): Promise<RowDataPacket[]> {
     const sql = "SELECT item.*, user_data.liked, user_data.watched, user_data.watchlist FROM item, user_data WHERE user_data.user_id=? AND user_data.item_id = item.id AND user_data.liked=1;";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [id]);
     return rows;
 }
 
-export async function getWatchedItems(id:number): Promise<RowDataPacket[]> {
-    const sql = "SELECT * FROM item, user_data WHERE user_data.user_id=? AND user_data.item_id = item.id AND user_data.watched=1;";
+export async function getWatchedItems(id: number): Promise<RowDataPacket[]> {
+    const sql = "SELECT item.*, user_data.liked, user_data.watched, user_data.watchlist, user_data.id as d_id FROM item, user_data WHERE user_data.user_id=? AND user_data.item_id = item.id AND user_data.watched=1 ORDER BY d_id desc;";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [id]);
     return rows;
 }
 
-export async function getWatchListItems(id:number): Promise<RowDataPacket[]> {
+export async function getWatchListItems(id: number): Promise<RowDataPacket[]> {
     const sql = "SELECT * FROM item, user_data WHERE user_data.user_id=? AND user_data.item_id = item.id AND user_data.watchlist=1;";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [id]);
     return rows;
 }
 
-export async function getReviewedItemsByUser(userId: number): Promise<RowDataPacket[]>{
+export async function getReviewedItemsByUser(userId: number): Promise<RowDataPacket[]> {
     const sql = "SELECT  item.id, " +
         "item.likes, " +
         "item.explanation_id, " +
@@ -174,22 +174,22 @@ export async function getItem(id: number): Promise<RowDataPacket[]> {
     return rows;
 }
 
-export async function updateStatus(userId:number, data:UserData): Promise<number> {
+export async function updateStatus(userId: number, data: UserData): Promise<number> {
     let sql = "SELECT EXISTS (SELECT * FROM user_data  WHERE user_id = ? AND item_id = ?) as value;";
     const [result] = await pool.query<RowDataPacket[]>(sql, [userId, data.item_id]);
     data.user_id = userId;
     // does any entry exists in the database?
-    if(result[0].value){
-        if(!data.watched && !data.liked && !data.watchlist){
+    if (result[0].value) {
+        if (!data.watched && !data.liked && !data.watchlist) {
             // delete if not longer needed => all are false
             sql = "DELETE FROM user_data WHERE user_id = ? AND item_id = ?";
             pool.query(sql, [userId, data.item_id]);
-        }else{
+        } else {
             // update entry
             sql = "UPDATE user_data SET ? WHERE user_id = ? AND item_id = ?";
             pool.query(sql, [data, userId, data.item_id]);
         }
-    }else{
+    } else {
         // create entry
         sql = "INSERT INTO user_data SET ?";
         pool.query(sql, [data]);
@@ -207,7 +207,7 @@ export async function updateItem(id: number, updateItem: Item): Promise<ResultSe
     return result;
 }
 
-export async function reviewItem(id:number, userId:number): Promise<RowDataPacket[]> {
+export async function reviewItem(id: number, userId: number): Promise<RowDataPacket[]> {
     const [result] = await pool.execute<RowDataPacket[]>('UPDATE item set reviewed=1, reviewed_by_id=? WHERE id = ?', [userId, id]);
     return result;
 }
