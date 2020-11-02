@@ -24,8 +24,8 @@ export async function addType(req: Request, res: Response): Promise<Response> {
 }
 
 export async function getTypes(language?: string): Promise<RowDataPacket[]> {
-    let languages = parseLanguage(language);
-    let sql = "SELECT  type.id, " +
+    const languages = parseLanguage(language);
+    const sql = "SELECT  type.id, " +
         "type.name, " +
         "type.view_external " +
         "FROM " +

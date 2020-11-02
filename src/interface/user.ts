@@ -1,5 +1,4 @@
-import { Response } from "express";
-import { cookieToken } from "./cookieToken";
+import { Item } from "./item";
 
 export interface User {
     username: string;
@@ -7,4 +6,5 @@ export interface User {
     email: string;
     role: string;
     id: number;
+    data?: Item[];
 }
