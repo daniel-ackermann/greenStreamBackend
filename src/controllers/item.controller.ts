@@ -136,7 +136,7 @@ export async function getItemsToReview(): Promise<RowDataPacket[]> {
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
         "LEFT JOIN user_data ON user_data.item_id = item.id " +
-        "WHERE item.reviewed IS NULL;";
+        "WHERE item.reviewed = 0;";
     const [row] = await pool.query<RowDataPacket[]>(sql);
     return row;
 }
