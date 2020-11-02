@@ -59,8 +59,7 @@ export async function getItemsByUser(userId: number): Promise<RowDataPacket[]> {
         "INNER JOIN type ON type.id = item.type_id " +
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "LEFT JOIN user_data ON user_data.item_id = item.id " +
-        "WHERE item.created_by_id = ? " +
-        "AND item.reviewed = 1 ";
+        "WHERE item.created_by_id = ? ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId]);
     return rows;
 }
