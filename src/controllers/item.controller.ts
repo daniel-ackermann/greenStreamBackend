@@ -40,7 +40,6 @@ export async function getItemsByUser(userId: number): Promise<RowDataPacket[]> {
     const sql = "SELECT  item.id, " +
         "item.explanation_id, " +
         "item.url, " +
-        "item.url, " +
         "item.description, " +
         "item.title, " +
         "item.language, " +
@@ -64,29 +63,14 @@ export async function getItemsByUser(userId: number): Promise<RowDataPacket[]> {
     return rows;
 }
 
-export async function getInteractedItemsByUser(userId:number) {
+export async function getInteractedItemsByUser(userId:number): Promise<RowDataPacket[]> {
     const sql = "SELECT  item.id, " +
-        "item.explanation_id, " +
-        "item.url, " +
-        "item.url, " +
-        "item.description, " +
-        "item.title, " +
-        "item.language, " +
-        "item.simple, " +
-        "item.reviewed, " +
-        "item.created_by_id, " +
-        "item.topic_id, " +
-        "item.type_id, " +
-        "topic.name, " +
-        "type.name, " +
-        "type.view_external, " +
         "user_data.liked, " +
         "user_data.watched, " +
-        "user_data.watchlist " +
+        "user_data.watchlist, " +
+        "UNIX_TIMESTAMP(user_data.last_recommended) * 1000 as last_recommended " +
         "FROM item " +
-        "INNER JOIN type ON type.id = item.type_id " +
-        "INNER JOIN topic ON topic.id = item.topic_id " +
-        "LEFT JOIN user_data ON user_data.item_id = item.id " +
+        "INNER JOIN user_data ON user_data.item_id = item.id " +
         "WHERE item.created_by_id = ? OR user_data.user_id = ? ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, userId]);
     return rows;
