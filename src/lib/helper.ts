@@ -13,3 +13,12 @@ export function parseLanguage(lang = "de,en,es"): string[] {
     // remove duplicates
     return [... new Set(result)];
 }
+
+
+export function removeEmptyStrings(value:string): boolean{
+    if (value.length === 0) {
+        return false;
+    } else {
+        return true;
+    }
+}

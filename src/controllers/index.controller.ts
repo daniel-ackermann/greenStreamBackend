@@ -9,6 +9,7 @@ import 'dotenv/config'
 import pool from '../lib/db';
 import { hasValidToken } from '../middleware';
 import { cookieToken } from '../interface/cookieToken';
+import { removeEmptyStrings } from '../lib/helper';
 
 
 // import pool from '../lib/db';
@@ -130,12 +131,4 @@ export async function sendEmail(req: Request, res: Response): Promise<Response> 
 async function getUser(email: string): Promise<RowDataPacket> {
     const [rows] = await pool.query<RowDataPacket[]>('SELECT username, id, email, role, language FROM user WHERE email = ?;', [email]);
     return rows[0];
-}
-
-function removeEmptyStrings(value:string){
-    if (value.length === 0) {
-        return false;
-    } else {
-        return true;
-    }
 }

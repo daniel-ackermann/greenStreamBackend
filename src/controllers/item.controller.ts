@@ -64,6 +64,34 @@ export async function getItemsByUser(userId: number): Promise<RowDataPacket[]> {
     return rows;
 }
 
+export async function getInteractedItemsByUser(userId:number) {
+    const sql = "SELECT  item.id, " +
+        "item.explanation_id, " +
+        "item.url, " +
+        "item.url, " +
+        "item.description, " +
+        "item.title, " +
+        "item.language, " +
+        "item.simple, " +
+        "item.reviewed, " +
+        "item.created_by_id, " +
+        "item.topic_id, " +
+        "item.type_id, " +
+        "topic.name, " +
+        "type.name, " +
+        "type.view_external, " +
+        "user_data.liked, " +
+        "user_data.watched, " +
+        "user_data.watchlist " +
+        "FROM item " +
+        "INNER JOIN type ON type.id = item.type_id " +
+        "INNER JOIN topic ON topic.id = item.topic_id " +
+        "LEFT JOIN user_data ON user_data.item_id = item.id " +
+        "WHERE item.created_by_id = ? OR user_data.user_id = ? ";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, userId]);
+    return rows;
+}
+
 export async function getLikedItems(id: number): Promise<RowDataPacket[]> {
     const sql = "SELECT item.*, user_data.liked, user_data.watched, user_data.watchlist FROM item, user_data WHERE user_data.user_id=? AND user_data.item_id = item.id AND user_data.liked=1;";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [id]);
