@@ -22,13 +22,9 @@ export async function getItems(lang?: string): Promise<RowDataPacket[]> {
         "topic.name, " +
         "type.name, " +
         "type.view_external, " +
-        "user_data.liked, " +
-        "user_data.watched, " +
-        "user_data.watchlist " +
         "FROM item " +
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
-        "LEFT JOIN user_data ON user_data.item_id = item.id " +
         "WHERE item.language IN (?) " +
         "AND item.reviewed = 1 ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [languages]);
@@ -53,7 +49,8 @@ export async function getItemsByUser(userId: number): Promise<RowDataPacket[]> {
         "type.view_external, " +
         "user_data.liked, " +
         "user_data.watched, " +
-        "user_data.watchlist " +
+        "user_data.watchlist, " +
+        "user_data.last_recommended " +
         "FROM item " +
         "INNER JOIN type ON type.id = item.type_id " +
         "INNER JOIN topic ON topic.id = item.topic_id " +
@@ -77,13 +74,13 @@ export async function getInteractedItemsByUser(userId:number): Promise<RowDataPa
 }
 
 export async function getLikedItems(id: number): Promise<RowDataPacket[]> {
-    const sql = "SELECT item.*, user_data.liked, user_data.watched, user_data.watchlist FROM item, user_data WHERE user_data.user_id=? AND user_data.item_id = item.id AND user_data.liked=1;";
+    const sql = "SELECT item.*, user_data.liked, user_data.watched, user_data.watchlist, user_data.last_recommended FROM item, user_data WHERE user_data.user_id=? AND user_data.item_id = item.id AND user_data.liked=1;";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [id]);
     return rows;
 }
 
 export async function getWatchedItems(id: number): Promise<RowDataPacket[]> {
-    const sql = "SELECT item.*, user_data.liked, user_data.watched, user_data.watchlist, user_data.id as d_id FROM item, user_data WHERE user_data.user_id=? AND user_data.item_id = item.id AND user_data.watched=1 ORDER BY d_id desc;";
+    const sql = "SELECT item.*, user_data.liked, user_data.watched, user_data.watchlist, user_data.id as d_id, user_data.last_recommended FROM item, user_data WHERE user_data.user_id=? AND user_data.item_id = item.id AND user_data.watched=1 ORDER BY d_id desc;";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [id]);
     return rows;
 }
@@ -113,7 +110,8 @@ export async function getReviewedItemsByUser(userId: number): Promise<RowDataPac
         "type.view_external, " +
         "user_data.liked, " +
         "user_data.watched, " +
-        "user_data.watchlist " +
+        "user_data.watchlist, " +
+        "user_data.last_recommended " +
         "FROM item " +
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
@@ -142,7 +140,8 @@ export async function getItemsToReview(): Promise<RowDataPacket[]> {
         "type.view_external, " +
         "user_data.liked, " +
         "user_data.watched, " +
-        "user_data.watchlist " +
+        "user_data.watchlist, " +
+        "user_data.last_recommended " +
         "FROM item " +
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
@@ -176,7 +175,8 @@ export async function getItem(id: number): Promise<RowDataPacket[]> {
         "type.view_external, " +
         "user_data.liked, " +
         "user_data.watched, " +
-        "user_data.watchlist " +
+        "user_data.watchlist, " +
+        "user_data.last_recommended " +
         "FROM item " +
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
