@@ -6,9 +6,7 @@ import { authenticate } from '../middleware';
 const router = Router();
 
 router.route('/:userId')
-    // .get(authenticate, async ( req: Request, res: Response): Promise<Response> => {
-        .get(async ( req: Request, res: Response): Promise<Response> => {
-
+    .get(authenticate, async ( req: Request, res: Response): Promise<Response> => {
         res.setHeader('Last-Modified', pool.getLastModified().toUTCString());
 
         if (req.headers["if-modified-since"]) {

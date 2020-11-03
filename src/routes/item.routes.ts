@@ -1,15 +1,21 @@
 import { Request, Response, Router } from 'express'
-import { getItems, addItem, getItem, deleteItem, updateItem, getReviewedItemsByUser, getItemsByUser, getItemsToReview, reviewItem, getLikedItems, getWatchListItems, getWatchedItems, updateStatus } from '../controllers/item.controller'
+import { getItems, addItem, getItem, deleteItem, updateItem, getReviewedItemsByUser, getItemsByUser, getItemsToReview, reviewItem, getLikedItems, getWatchListItems, getWatchedItems, updateStatus, getItemsWithUserData, getItemWithUserData } from '../controllers/item.controller'
 import { Item } from '../interface/item';
 import { UserData } from '../interface/userdata';
-import { authenticate } from '../middleware';
+import { authenticate, hasValidToken } from '../middleware';
 
 const router = Router();
 
 router.route('/')
     .get(async (req: Request, res: Response) => {
-        const data = await getItems(req.headers["accept-language"])
-        return res.json(data);
+        req.token = hasValidToken(req.cookies.jwt);
+        if (req.cookies.jwt && req.token != false) {
+            const data = await getItemsWithUserData(req.token.id, req.headers["accept-language"]);
+            return res.status(200).json(data)
+        } else {
+            const data = await getItems(req.headers["accept-language"])
+            return res.status(200).json(data);
+        }
     })
     .post(authenticate, async (req: Request, res: Response) => {
         req.body.created_by_id = req.token.id;
@@ -25,9 +31,9 @@ router.route('/reviewed')
     });
 
 router.route('/review')
-    .get(async (req: Request, res: Response) => {
+    .get(authenticate, async (req: Request, res: Response) => {
         res.json(
-            await getItemsToReview()
+            await getItemsToReview(req.token.id)
         );
     })
 
@@ -73,13 +79,23 @@ router.route('/status')
     })
 
 router.route('/:itemId')
-    .get(authenticate, async (req: Request, res: Response) => {
-        updateStatus(req.token.id, { item_id: parseInt(req.params.itemId, 10), watched: true });
-        return res.json(
-            await getItem(
-                parseInt(req.params.itemId) || 0
-            )
-        );
+    .get(async (req: Request, res: Response) => {
+        req.token = hasValidToken(req.cookies.jwt);
+        if (req.cookies.jwt && req.token != false) {
+            updateStatus(req.token.id, { item_id: parseInt(req.params.itemId, 10), watched: true });
+            return res.json(
+                await getItemWithUserData(
+                    parseInt(req.params.itemId),
+                    req.token.id
+                )
+            );
+        } else {
+            return res.json(
+                await getItem(
+                    parseInt(req.params.itemId)
+                )
+            );
+        }
     })
     .delete(authenticate, async (req: Request, res: Response) => {
         return res.json(
