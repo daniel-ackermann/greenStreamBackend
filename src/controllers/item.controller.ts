@@ -26,7 +26,7 @@ export async function getItems(lang?: string): Promise<RowDataPacket[]> {
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
         "WHERE item.language IN (?) " +
-        "AND item.reviewed = 1 ";
+        "AND item.reviewed = 1  ORDER BY item.id";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [languages]);
     return rows;
 }
@@ -58,7 +58,7 @@ export async function getItemsWithUserData(userId: number, lang?: string): Promi
         "INNER JOIN type ON type.id = item.type_id " +
         "LEFT JOIN user_data ON user_data.item_id = item.id AND user_data.user_id = ? " +
         "WHERE item.language IN (?) " +
-        "AND item.reviewed = 1 ";
+        "AND item.reviewed = 1 ORDER BY item.id";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, languages]);
     return rows;
 }
@@ -87,7 +87,7 @@ export async function getItemsByUser(userId: number): Promise<RowDataPacket[]> {
         "INNER JOIN type ON type.id = item.type_id " +
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "LEFT JOIN user_data ON user_data.item_id = item.id AND user_data.user_id = ? " +
-        "WHERE item.created_by_id = ? ";
+        "WHERE item.created_by_id = ?  ORDER BY item.id";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, userId]);
     return rows;
 }
@@ -100,7 +100,7 @@ export async function getInteractedItemsByUser(userId: number): Promise<RowDataP
         "UNIX_TIMESTAMP(user_data.last_recommended) * 1000 as last_recommended " +
         "FROM item " +
         "INNER JOIN user_data ON user_data.item_id = item.id " +
-        "WHERE item.created_by_id = ? AND user_data.user_id = ? ";
+        "WHERE item.created_by_id = ? AND user_data.user_id = ?  ORDER BY item.id";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, userId]);
     return rows;
 }
@@ -127,7 +127,7 @@ export async function getLikedItems(id: number): Promise<RowDataPacket[]> {
         "FROM item " +
         "INNER JOIN type ON type.id = item.type_id " +
         "INNER JOIN topic ON topic.id = item.topic_id " +
-        "INNER JOIN user_data ON user_data.item_id = item.id AND user_data.liked = 1 AND user_data.user_id = ? ";
+        "INNER JOIN user_data ON user_data.item_id = item.id AND user_data.liked = 1 AND user_data.user_id = ?  ORDER BY item.id";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [id]);
     return rows;
 }
@@ -139,7 +139,7 @@ export async function getWatchedItems(id: number): Promise<RowDataPacket[]> {
 }
 
 export async function getWatchListItems(id: number): Promise<RowDataPacket[]> {
-    const sql = "SELECT * FROM item, user_data WHERE user_data.user_id=? AND user_data.item_id = item.id AND user_data.watchlist=1;";
+    const sql = "SELECT item.*, user_data.liked, user_data.watched, user_data.watchlist, user_data.id as d_id, user_data.last_recommended FROM item, user_data WHERE user_data.user_id=? AND user_data.item_id = item.id AND user_data.watchlist=1  ORDER BY item.id";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [id]);
     return rows;
 }
@@ -170,7 +170,7 @@ export async function getReviewedItemsByUser(userId: number): Promise<RowDataPac
         "INNER JOIN type ON type.id = item.type_id " +
         "LEFT JOIN user_data ON user_data.item_id = item.id AND user_data.user_id = ? " +
         "WHERE item.reviewed=1 " +
-        "AND item.reviewed_by_id = ?";
+        "AND item.reviewed_by_id = ?  ORDER BY item.id";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, userId]);
     return rows;
 }
@@ -199,7 +199,7 @@ export async function getItemsToReview(userId: number): Promise<RowDataPacket[]>
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
         "LEFT JOIN user_data ON user_data.item_id = item.id AND user_data.user_id = ? " +
-        "WHERE item.reviewed = 0;";
+        "WHERE item.reviewed = 0  ORDER BY item.id";
     const [row] = await pool.query<RowDataPacket[]>(sql, [userId]);
     return row;
 }
