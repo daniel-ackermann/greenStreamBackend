@@ -6,3 +6,4 @@ credentials
 server.cert
 server.key
 html/index.html
+html/**/*
