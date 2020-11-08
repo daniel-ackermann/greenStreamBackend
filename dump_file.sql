@@ -128,19 +128,20 @@ CREATE TABLE `user` (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 DROP TABLE IF EXISTS `user_data`;
-Create TABLE `user_data` (
+CREATE TABLE `user_data` (
     `id` int NOT NULL AUTO_INCREMENT,
-    `userId` int NOT NULL,
-    `itemId` int,
-    `liked` int,
-    `watched` int,
-    `onWatchLaterList` int
-)
+    `user_id` int NOT NULL,
+    `item_id` int,
+    `liked` BOOL DEFAULT FALSE,
+    `watched` BOOL DEFAULT FALSE,
+    `watchlist` BOOL DEFAULT FALSE,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `information_feedback` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `information_id` int(10) unsigned NOT NULL DEFAULT '0',
   `feedback` varchar(256) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `id` (`information_id`),
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4_general_ci;
+  KEY `id` (`information_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
