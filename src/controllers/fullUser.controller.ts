@@ -10,9 +10,17 @@ export async function getFullUser(userId: number): Promise<UserWithoutPassword>{
     return user;
 }
 
-export async function saveFullUser(userId:number, user: UserWithoutPassword): Promise<void> {
+export async function saveFullUser(userId:number, data: UserWithoutPassword): Promise<void> {
+    const user = {
+        username: data.username,
+        show_in_app: data.show_in_app,
+        notification_time: data.notification_time,
+        topics: data.topics,
+        language: data.language,
+        email: data.email,
+    }
     updateUserById(userId, user);
-    (user.data|| []).forEach((item: UserData) => {
+    (data.data|| []).forEach((item: UserData) => {
         updateStatus(userId, item as UserData);
     });
 }

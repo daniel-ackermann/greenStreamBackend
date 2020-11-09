@@ -56,7 +56,7 @@ export async function getItemsWithUserData(userId: number, lang?: string): Promi
         "FROM item " +
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
-        "LEFT JOIN user_data ON user_data.item_id = item.id AND user_data.user_id = ? " +
+        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
         "WHERE item.language IN (?) " +
         "AND item.reviewed = 1 ORDER BY item.id";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, languages]);
@@ -86,7 +86,7 @@ export async function getItemsByUser(userId: number): Promise<RowDataPacket[]> {
         "FROM item " +
         "INNER JOIN type ON type.id = item.type_id " +
         "INNER JOIN topic ON topic.id = item.topic_id " +
-        "LEFT JOIN user_data ON user_data.item_id = item.id AND user_data.user_id = ? " +
+        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
         "WHERE item.created_by_id = ?  ORDER BY item.id";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, userId]);
     return rows;
@@ -99,7 +99,7 @@ export async function getInteractedItemsByUser(userId: number): Promise<RowDataP
         "user_data.watchlist, " +
         "UNIX_TIMESTAMP(user_data.last_recommended) * 1000 as last_recommended " +
         "FROM item " +
-        "INNER JOIN user_data ON user_data.item_id = item.id " +
+        "INNER JOIN user_data ON user_data.id = item.id " +
         "WHERE item.created_by_id = ? AND user_data.user_id = ?  ORDER BY item.id";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, userId]);
     return rows;
@@ -127,19 +127,19 @@ export async function getLikedItems(id: number): Promise<RowDataPacket[]> {
         "FROM item " +
         "INNER JOIN type ON type.id = item.type_id " +
         "INNER JOIN topic ON topic.id = item.topic_id " +
-        "INNER JOIN user_data ON user_data.item_id = item.id AND user_data.liked = 1 AND user_data.user_id = ?  ORDER BY item.id";
+        "INNER JOIN user_data ON user_data.id = item.id AND user_data.liked = 1 AND user_data.user_id = ?  ORDER BY item.id";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [id]);
     return rows;
 }
 
 export async function getWatchedItems(id: number): Promise<RowDataPacket[]> {
-    const sql = "SELECT item.*, user_data.liked, user_data.watched, user_data.watchlist, user_data.id as d_id, user_data.last_recommended FROM item, user_data WHERE user_data.user_id=? AND user_data.item_id = item.id AND user_data.watched=1 ORDER BY d_id desc;";
+    const sql = "SELECT item.*, user_data.liked, user_data.watched, user_data.watchlist, user_data.id as d_id, user_data.last_recommended FROM item, user_data WHERE user_data.user_id=? AND user_data.id = item.id AND user_data.watched=1 ORDER BY d_id desc;";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [id]);
     return rows;
 }
 
 export async function getWatchListItems(id: number): Promise<RowDataPacket[]> {
-    const sql = "SELECT item.*, user_data.liked, user_data.watched, user_data.watchlist, user_data.id as d_id, user_data.last_recommended FROM item, user_data WHERE user_data.user_id=? AND user_data.item_id = item.id AND user_data.watchlist=1  ORDER BY item.id";
+    const sql = "SELECT item.*, user_data.liked, user_data.watched, user_data.watchlist, user_data.id as d_id, user_data.last_recommended FROM item, user_data WHERE user_data.user_id=? AND user_data.id = item.id AND user_data.watchlist=1  ORDER BY item.id";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [id]);
     return rows;
 }
@@ -168,7 +168,7 @@ export async function getReviewedItemsByUser(userId: number): Promise<RowDataPac
         "FROM item " +
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
-        "LEFT JOIN user_data ON user_data.item_id = item.id AND user_data.user_id = ? " +
+        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
         "WHERE item.reviewed=1 " +
         "AND item.reviewed_by_id = ?  ORDER BY item.id";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, userId]);
@@ -198,7 +198,7 @@ export async function getItemsToReview(userId: number): Promise<RowDataPacket[]>
         "FROM item " +
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
-        "LEFT JOIN user_data ON user_data.item_id = item.id AND user_data.user_id = ? " +
+        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
         "WHERE item.reviewed = 0  ORDER BY item.id";
     const [row] = await pool.query<RowDataPacket[]>(sql, [userId]);
     return row;
@@ -257,25 +257,25 @@ export async function getItemWithUserData(id: number, userId: number): Promise<R
         "FROM item " +
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
-        "LEFT JOIN user_data ON user_data.item_id = item.id AND user_data.user_id = ? " +
+        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
         "WHERE item.id=?;";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, id]);
     return rows;
 }
 
 export async function updateStatus(userId: number, data: UserData): Promise<number> {
-    let sql = "SELECT EXISTS (SELECT * FROM user_data  WHERE user_id = ? AND item_id = ?) as value;";
+    let sql = "SELECT EXISTS (SELECT * FROM user_data  WHERE user_id = ? AND id = ?) as value;";
     const [result] = await pool.query<RowDataPacket[]>(sql, [userId, data.id]);
     data.user_id = userId;
     // does any entry exists in the database?
     if (result[0].value) {
         if (!data.watched && !data.liked && !data.watchlist) {
             // delete if not longer needed => all are false
-            sql = "DELETE FROM user_data WHERE user_id = ? AND item_id = ?";
+            sql = "DELETE FROM user_data WHERE user_id = ? AND id = ?";
             pool.query(sql, [userId, data.id]);
         } else {
             // update entry
-            sql = "UPDATE user_data SET ? WHERE user_id = ? AND item_id = ?";
+            sql = "UPDATE user_data SET ? WHERE user_id = ? AND id = ?";
             pool.query(sql, [data, userId, data.id]);
         }
     } else {

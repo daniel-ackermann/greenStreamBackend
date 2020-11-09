@@ -6,9 +6,23 @@ export interface User extends UserWithoutPassword {
 }
 
 export interface UserWithoutPassword{
-    username: string;
     email: string;
     role: string;
     id: number;
+    username?: string;
+    show_in_app?: number;
+    notification_time?: string;
+    language?: string[];
+    last_change?: any;
+    topics?: string[];
+    data?: UserData[];
+}
+
+export interface UpdateUser {
+    username?: string;
+    show_in_app?: number;
+    notification_time?: string;
+    language?: string[];
+    topics?: string[];
     data?: UserData[];
 }

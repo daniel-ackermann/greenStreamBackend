@@ -6,9 +6,8 @@ import { authenticate } from '../middleware';
 
 const router = Router();
 
-router.route('/:userId')
-    .get(async ( req: Request, res: Response): Promise<Response> => {
-        // .get(authenticate, async ( req: Request, res: Response): Promise<Response> => {
+router.route('/')
+    .get(authenticate, async (req: Request, res: Response): Promise<Response> => {
         res.setHeader('Last-Modified', pool.getLastModified().toUTCString());
 
         if (req.headers["if-modified-since"]) {
@@ -17,12 +16,12 @@ router.route('/:userId')
             }
         }
         return res.status(200).json(
-            await getFullUser(parseInt(req.params.userId, 10))
+            await getFullUser(parseInt(req.token.id, 10))
         )
     })
     .post(authenticate, async (req: Request, res: Response): Promise<Response> => {
         return res.status(200).json(
-            await saveFullUser(parseInt(req.params.userId), req.body as UserWithoutPassword)
+            await saveFullUser(parseInt(req.token.id), req.body as UserWithoutPassword)
         )
     });
 

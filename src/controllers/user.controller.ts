@@ -1,5 +1,5 @@
 import { RowDataPacket } from "mysql2";
-import { User, UserWithoutPassword } from "../interface/user";
+import { UpdateUser, User, UserWithoutPassword } from "../interface/user";
 import pool from "../lib/db";
 import { removeEmptyStrings } from "../lib/helper";
 
@@ -22,7 +22,7 @@ export async function updateUser(id: string, user: User): Promise<void>{
     await pool.query('UPDATE user SET ? WHERE email = ?', [user, id]);
 }
 
-export async function updateUserById(id: number, user: User|UserWithoutPassword): Promise<void>{
+export async function updateUserById(id: number, user: UpdateUser): Promise<void>{
     await pool.query('UPDATE user SET ? WHERE id = ?', [user, id]);
     
 }
