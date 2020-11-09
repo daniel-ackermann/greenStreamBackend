@@ -265,18 +265,18 @@ export async function getItemWithUserData(id: number, userId: number): Promise<R
 
 export async function updateStatus(userId: number, data: UserData): Promise<number> {
     let sql = "SELECT EXISTS (SELECT * FROM user_data  WHERE user_id = ? AND item_id = ?) as value;";
-    const [result] = await pool.query<RowDataPacket[]>(sql, [userId, data.item_id]);
+    const [result] = await pool.query<RowDataPacket[]>(sql, [userId, data.id]);
     data.user_id = userId;
     // does any entry exists in the database?
     if (result[0].value) {
         if (!data.watched && !data.liked && !data.watchlist) {
             // delete if not longer needed => all are false
             sql = "DELETE FROM user_data WHERE user_id = ? AND item_id = ?";
-            pool.query(sql, [userId, data.item_id]);
+            pool.query(sql, [userId, data.id]);
         } else {
             // update entry
             sql = "UPDATE user_data SET ? WHERE user_id = ? AND item_id = ?";
-            pool.query(sql, [data, userId, data.item_id]);
+            pool.query(sql, [data, userId, data.id]);
         }
     } else {
         // create entry

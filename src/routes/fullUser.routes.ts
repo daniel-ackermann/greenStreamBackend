@@ -1,12 +1,14 @@
 import { Request, Response, Router } from 'express'
-import { fullUser } from '../controllers/fullUser.controller';
+import { getFullUser, saveFullUser } from '../controllers/fullUser.controller';
+import { UserWithoutPassword } from '../interface/user';
 import pool from '../lib/db';
 import { authenticate } from '../middleware';
 
 const router = Router();
 
 router.route('/:userId')
-    .get(authenticate, async ( req: Request, res: Response): Promise<Response> => {
+    .get(async ( req: Request, res: Response): Promise<Response> => {
+        // .get(authenticate, async ( req: Request, res: Response): Promise<Response> => {
         res.setHeader('Last-Modified', pool.getLastModified().toUTCString());
 
         if (req.headers["if-modified-since"]) {
@@ -15,7 +17,12 @@ router.route('/:userId')
             }
         }
         return res.status(200).json(
-            await fullUser(parseInt(req.params.userId, 10))
+            await getFullUser(parseInt(req.params.userId, 10))
+        )
+    })
+    .post(authenticate, async (req: Request, res: Response): Promise<Response> => {
+        return res.status(200).json(
+            await saveFullUser(parseInt(req.params.userId), req.body as UserWithoutPassword)
         )
     });
 

@@ -1,8 +1,8 @@
 export interface UserData {
     user_id?: number;
-    item_id: number;
-    watched?: boolean;
+    id: number;
     liked?: boolean;
+    watched?: boolean;
     watchlist?: boolean;
-    id?: number;
+    last_recommended?: number;
 }

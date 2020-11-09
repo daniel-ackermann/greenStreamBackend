@@ -1,4 +1,5 @@
 import { Item } from "./item";
+import { UserData } from "./userdata";
 
 export interface User extends UserWithoutPassword {
     password: string;
@@ -9,5 +10,5 @@ export interface UserWithoutPassword{
     email: string;
     role: string;
     id: number;
-    data?: Item[];
+    data?: UserData[];
 }

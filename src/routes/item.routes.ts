@@ -82,7 +82,7 @@ router.route('/:itemId')
     .get(async (req: Request, res: Response) => {
         req.token = hasValidToken(req.cookies.jwt);
         if (req.cookies.jwt && req.token != false) {
-            updateStatus(req.token.id, { item_id: parseInt(req.params.itemId, 10), watched: true });
+            updateStatus(req.token.id, { id: parseInt(req.params.itemId, 10), watched: true });
             return res.json(
                 await getItemWithUserData(
                     parseInt(req.params.itemId),
