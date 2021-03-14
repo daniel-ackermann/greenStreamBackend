@@ -1,15 +1,16 @@
 # REST-Endpunkte
 
 ```
-GET         http://appsterdb.ackermann.digital/api/items           Liste aller Items
-POST      * http://appsterdb.ackermann.digital/api/items           ADD Item
+GET         http://appsterdb.ackermann.digital/api/items                Liste aller Items
+POST      * http://appsterdb.ackermann.digital/api/items                ADD Item
+GET       * https://appsterdb.ackermann.digital/api/items/review        GET items to review
 
 GET       * https://appsterdb.ackermann.digital/api/items/reviewed      GET userdata
 GET       * https://appsterdb.ackermann.digital/api/items/created       GET userdata
 GET       * https://appsterdb.ackermann.digital/api/items/liked         GET userdata
-GET       * https://appsterdb.ackermann.digital/api/items/review        GET userdata
 GET       * https://appsterdb.ackermann.digital/api/items/watched       GET userdata
 GET       * https://appsterdb.ackermann.digital/api/items/watchlist     GET userdata
+GET       * https://appsterdb.ackermann.digital/api/items/status        GET update with object of type Status
 
 GET         http://appsterdb.ackermann.digital/api/items/136       GET Item mit ID 136
 DELETE    * http://appsterdb.ackermann.digital/api/items/136       DELETE Item mit ID 136
@@ -51,7 +52,7 @@ POST /login => Setzt Cookie der mitgeschickt werden muss um eingeloggt zu sein.
 
 ```
 export interface Item {
-    id?: number,
+    id: number,
     likes: number,
     explanation_id?: number,
     type_id: number,
@@ -85,6 +86,15 @@ export interface User {
     password: string;
     email: string;
     role: string;
+}
+```
+
+```
+export interface Status {
+    id: number;
+    liked?: boolean;
+    watchlist?: boolean;
+    watched?: boolean;
 }
 ```
 
