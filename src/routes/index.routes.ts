@@ -1,7 +1,7 @@
 
 import { Request, Response, Router } from 'express'
 import { checkStatus, deleteAccount, registerAccount, sendEmail, signIn, signOut } from '../controllers/index.controller'
-import { passwordRestoreRequest, saveNewPassword } from '../controllers/password.controller';
+import { saveNewPassword } from '../controllers/password.controller';
 import { cookieToken } from '../interface/cookieToken';
 import { authenticate } from '../middleware';
 import TokenService from '../services/token.service';
@@ -28,14 +28,13 @@ router.route("/login")
     .delete(signOut);
 
 router.route("/passwordRestore")
-    .get(passwordRestoreRequest)
     .post((req: Request, res: Response) => {
-        const token = tokenService.valid(req.cookies.tk as string);
+        const token = tokenService.valid(req.body.token as string);
         if(token.valid === true){
             saveNewPassword(req.body.password, token.owner);
-            res.send("Erfolgreich gespeichert!");
+            res.status(200).send("Erfolgreich gespeichert!");
         }else{
-            return res.send("Ein Fehler ist aufgetreten!");
+            return res.status(401).send({text:"Ein Fehler ist aufgetreten!", data: JSON.stringify(req.body) });
         }
     });
 
