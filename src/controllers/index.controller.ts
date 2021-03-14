@@ -114,8 +114,21 @@ export async function sendEmail(req: Request, res: Response): Promise<Response> 
         from: process.env.EMAIL_AUTH_USER,
         to: req.query.user as string,
         subject: 'Passwort vergessen: Greenstream Project',
-        text: 'Hier sollte jetzt ein toller Link sein mit dem du dein Passwort zurück setzten können solltest...\n',
-        html: `Bitte folge diesem Link: <a href="https://appsterdb.ackermann.digital/passwordRestore/${token}">https://appsterdb.ackermann.digital/passwordRestore/${token}</a>`
+        text: '',
+        html: `Hallo,
+        <br><br>
+        Jemand hat für ${req.query.user as string} ein neues Passwort für Greenstream angefordert.
+        <br><br>
+        Du kannst das Passwort mit folgendem Link ändern:
+        <br><br>
+        <a href="https://appsterdb.ackermann.digital/passwordRestore/${token}">Passwort ändern</a>
+        <br><br>
+        Wenn du das nicht warst ignoriere diese Nachricht bitte. Dein Passwort ändert sich dann  nicht.
+        <br><br>
+        Mit freundlichen Grüßen
+        <br><br>
+        dein Greenstream-Team
+        `
     };
     transporter.sendMail(mailOptions, function (error: Error | null, info: any) {
         if (error) {
