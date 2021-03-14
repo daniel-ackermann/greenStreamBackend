@@ -115,7 +115,7 @@ export async function sendEmail(req: Request, res: Response): Promise<Response> 
         to: req.query.user as string,
         subject: 'Passwort vergessen: Greenstream Project',
         text: 'Hier sollte jetzt ein toller Link sein mit dem du dein Passwort zurück setzten können solltest...\n',
-        html: `Bitte folge diesem Link: <a href="https://appsterdb.ackermann.digital/passwordRestore?token=${token}">https://appsterdb.ackermann.digital/passwordRestore?token=${token}</a>"`
+        html: `Bitte folge diesem Link: <a href="https://appsterdb.ackermann.digital/passwordRestore/${token}">https://appsterdb.ackermann.digital/passwordRestore/${token}</a>`
     };
     transporter.sendMail(mailOptions, function (error: Error | null, info: any) {
         if (error) {
