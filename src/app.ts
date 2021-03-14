@@ -1,7 +1,6 @@
 import express, { Application } from 'express';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
-import bodyParser from 'body-parser';
 import fs from 'fs';
 import path from 'path';
 
@@ -16,7 +15,6 @@ import FullUserRoutes from './routes/fullUser.routes';
 import UserRoutes from './routes/user.routes';
 import FeedbackRoutes from './routes/feedback.routes';
 import LanguageRoutes from './routes/language.routes';
-import * as http from 'http';
 import * as https from 'https';
 import compression from 'compression';
 
@@ -24,14 +22,13 @@ export class App {
     app: Application = express();
 
     constructor(
-        private port: number | string,
-        private secPort: number | string
+        private port: number
     ) {
-        this.middlewares();
+        this.middleware();
         this.routes();
     }
 
-    private middlewares() {
+    private middleware() {
         this.app.use(express.static(path.resolve(__dirname, '../html'), { maxAge: 31557600000 }));
         this.app.use(morgan('dev'));
         this.app.use(express.json());
@@ -42,7 +39,8 @@ export class App {
             res.header("Access-Control-Allow-Methods", "*");
             next();
         });
-        this.app.use(bodyParser.urlencoded({ extended: true }));
+        this.app.use(express.urlencoded({ extended: true }));
+        this.app.use(express.json());
         this.app.use(cookieParser());
     }
 
@@ -66,6 +64,6 @@ export class App {
         const privateKey = fs.readFileSync(process.env.KEY_PATH as string);
         const certificate = fs.readFileSync(process.env.CERT_PATH as string);
         const credentials = { key: privateKey, cert: certificate };
-        https.createServer(credentials, this.app).listen(this.secPort || process.env.PORT || 3000);
+        https.createServer(credentials, this.app).listen(this.port || process.env.PORT || 3000, '127.0.0.1');
     }
 }
