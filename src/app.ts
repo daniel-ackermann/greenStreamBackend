@@ -22,7 +22,7 @@ export class App {
     app: Application = express();
 
     constructor(
-        private port: number | string
+        private port: number
     ) {
         this.middleware();
         this.routes();
@@ -64,6 +64,6 @@ export class App {
         const privateKey = fs.readFileSync(process.env.KEY_PATH as string);
         const certificate = fs.readFileSync(process.env.CERT_PATH as string);
         const credentials = { key: privateKey, cert: certificate };
-        https.createServer(credentials, this.app).listen(this.port || process.env.PORT || 3000, "127.0.0.1");
+        https.createServer(credentials, this.app).listen(this.port || 3000, "127.0.0.1", 511);
     }
 }
