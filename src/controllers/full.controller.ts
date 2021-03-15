@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import pool from "../lib/db";
-import { getItems } from "./item.controller";
+import { getItems } from "./items.controller";
 import { getTopics } from "./topic.controller";
 import { getTypes } from "./type.controller";
 import { getLanguages } from "./language.controller";

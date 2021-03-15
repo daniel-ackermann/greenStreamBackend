@@ -46,3 +46,5 @@ router.route('/:itemId')
             )
         )
     });
+
+export default router;

@@ -8,6 +8,7 @@ import path from 'path';
 import ImportRoutes from './routes/import.routes';
 import IndexRoutes from './routes/index.routes'
 import ItemRoutes from './routes/item.routes';
+import ItemsRoutes from './routes/items.routes';
 import TopicRoutes from './routes/topic.routes';
 import TypeRoutes from './routes/type.routes';
 import FullRoutes from './routes/full.routes';
@@ -47,7 +48,8 @@ export class App {
     private routes() {
         this.app.use('/api/import', ImportRoutes);
         this.app.use('/', IndexRoutes);
-        this.app.use('/api/items', ItemRoutes);
+        this.app.use('/api/items', ItemsRoutes);
+        this.app.use('/api/item', ItemRoutes);
         this.app.use('/api/topics', TopicRoutes);
         this.app.use('/api/types', TypeRoutes);
         this.app.use('/api/full', FullRoutes);
@@ -61,9 +63,10 @@ export class App {
     }
 
     async listen(): Promise<void> {
-        const privateKey = fs.readFileSync(process.env.KEY_PATH as string);
-        const certificate = fs.readFileSync(process.env.CERT_PATH as string);
-        const credentials = { key: privateKey, cert: certificate };
+        const credentials = {
+            key: fs.readFileSync(process.env.KEY_PATH as string),
+            cert: fs.readFileSync(process.env.CERT_PATH as string)
+        };
         https.createServer(credentials, this.app).listen(this.port || 3000, "0.0.0.0", 511);
     }
 }

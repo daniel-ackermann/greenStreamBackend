@@ -1,8 +1,8 @@
-import { getInteractedItemsByUser, getItemsByUser, updateStatus } from "./item.controller";
-import { getUser, getUserWithoutPassword, updateUserById } from "./user.controller";
-import { User, UserWithoutPassword } from "../interface/user";
-import { Item } from "../interface/item";
+import { getInteractedItemsByUser, } from "./items.controller";
+import { getUserWithoutPassword, updateUserById } from "./user.controller";
+import { UserWithoutPassword } from "../interface/user";
 import { UserData } from "../interface/userdata";
+import { updateStatus } from "./item.controller";
 
 export async function getFullUser(userId: number): Promise<UserWithoutPassword>{
     const [ user ] = await getUserWithoutPassword(userId) as UserWithoutPassword[];
