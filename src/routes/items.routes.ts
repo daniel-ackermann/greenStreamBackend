@@ -1,5 +1,6 @@
 import { Request, Response, Router } from 'express'
-import { getItems, addItem, getItem, deleteItem, updateItem, getReviewedItemsByUser, getItemsByUser, getItemsToReview, reviewItem, getLikedItems, getWatchListItems, getWatchedItems, updateStatus, getItemsWithUserData, getItemWithUserData, getSuggestedItems } from '../controllers/item.controller'
+import { addItem, updateStatus } from '../controllers/item.controller';
+import { getItems, getReviewedItemsByUser, getItemsByUser, getItemsToReview, getLikedItems, getWatchListItems, getWatchedItems, getItemsWithUserData, getSuggestedItems } from '../controllers/items.controller'
 import { Item } from '../interface/item';
 import { UserData } from '../interface/userdata';
 import { authenticate, hasValidToken } from '../middleware';
@@ -23,7 +24,7 @@ router.route('/')
         return res.json(data);
     });
 
-router.route('/browse/:limit/:startId?')
+router.route('/:limit/:startId?')
     .get(authenticate, async (req: Request, res: Response) => {
         return res.json(
             await getSuggestedItems(parseInt(req.token.id, 10), parseInt(req.params.startId) || 0, parseInt(req.params.limit), req.headers["accept-language"])
@@ -41,13 +42,6 @@ router.route('/review')
     .get(authenticate, async (req: Request, res: Response) => {
         res.json(
             await getItemsToReview(req.token.id)
-        );
-    })
-
-router.route('/review/:id')
-    .get(authenticate, async (req: Request, res: Response) => {
-        res.json(
-            await reviewItem(parseInt(req.params.id), parseInt(req.token.id, 10))
         );
     })
 
@@ -84,41 +78,5 @@ router.route('/status')
         updateStatus(parseInt(req.token.id, 10), req.body as UserData)
         return res.json(200)
     })
-
-router.route('/:itemId')
-    .get(async (req: Request, res: Response) => {
-        req.token = hasValidToken(req.cookies.jwt);
-        if (req.cookies.jwt && req.token != false) {
-            updateStatus(req.token.id, { id: parseInt(req.params.itemId, 10), watched: true });
-            return res.json(
-                await getItemWithUserData(
-                    parseInt(req.params.itemId),
-                    req.token.id
-                )
-            );
-        } else {
-            return res.json(
-                await getItem(
-                    parseInt(req.params.itemId)
-                )
-            );
-        }
-    })
-    .delete(authenticate, async (req: Request, res: Response) => {
-        return res.json(
-            await deleteItem(
-                parseInt(req.params.itemId)
-            )
-        )
-    })
-    .put(authenticate, async (req: Request, res: Response) => {
-        return res.json(
-            await updateItem(
-                parseInt(req.params.itemId),
-                req.body as Item
-            )
-        )
-    });
-
 
 export default router;
