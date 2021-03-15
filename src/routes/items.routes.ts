@@ -23,13 +23,6 @@ router.route('/')
         return res.json(data);
     });
 
-router.route('/:limit/:startId?')
-    .get(authenticate, async (req: Request, res: Response) => {
-        return res.json(
-            await getSuggestedItems(parseInt(req.token.id, 10), parseInt(req.params.startId) || 0, parseInt(req.params.limit), req.headers["accept-language"])
-        )
-    });
-
 router.route('/reviewed')
     .get(authenticate, async (req: Request, res: Response) => {
         return res.json(
@@ -71,5 +64,12 @@ router.route('/watchlist')
             await getWatchListItems(parseInt(req.token.id, 10))
         )
     })
+
+router.route('/:limit/:startId?')
+    .get(authenticate, async (req: Request, res: Response) => {
+        return res.json(
+            await getSuggestedItems(parseInt(req.token.id, 10), parseInt(req.params.startId) || 0, parseInt(req.params.limit), req.headers["accept-language"])
+        )
+    });
 
 export default router;
