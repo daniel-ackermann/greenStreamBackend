@@ -1,5 +1,5 @@
 import { Request, Response, Router } from 'express'
-import { getItems, addItem, getItem, deleteItem, updateItem, getReviewedItemsByUser, getItemsByUser, getItemsToReview, reviewItem, getLikedItems, getWatchListItems, getWatchedItems, updateStatus, getItemsWithUserData, getItemWithUserData } from '../controllers/item.controller'
+import { getItems, addItem, getItem, deleteItem, updateItem, getReviewedItemsByUser, getItemsByUser, getItemsToReview, reviewItem, getLikedItems, getWatchListItems, getWatchedItems, updateStatus, getItemsWithUserData, getItemWithUserData, getSuggestedItems } from '../controllers/item.controller'
 import { Item } from '../interface/item';
 import { UserData } from '../interface/userdata';
 import { authenticate, hasValidToken } from '../middleware';
@@ -21,6 +21,13 @@ router.route('/')
         req.body.created_by_id = req.token.id;
         const data = await addItem(req.body as Item)
         return res.json(data);
+    });
+
+router.route('/browse/:page?')
+    .get(authenticate, async (req: Request, res: Response) => {
+        return res.json(
+            await getSuggestedItems(parseInt(req.token.id, 10), parseInt(req.params.page) || 0, req.headers["accept-language"])
+        )
     });
 
 router.route('/reviewed')

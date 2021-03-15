@@ -65,6 +65,40 @@ export async function getItemsWithUserData(userId: number, lang?: string): Promi
     return rows;
 }
 
+export async function getSuggestedItems(userId: number, page:number, lang?:string): Promise<RowDataPacket[]> {
+    const languages = parseLanguage(lang);
+    const sql = "SELECT  item.id, " +
+        "item.likes, " +
+        "item.explanation_id, " +
+        "item.url, " +
+        "item.url, " +
+        "item.description, " +
+        "item.title, " +
+        "item.language, " +
+        "item.simple, " +
+        "item.reviewed, " +
+        "item.created_by_id, " +
+        "item.topic_id, " +
+        "item.type_id, " +
+        "topic.name as topic_name, " +
+        "type.name as type_name, " +
+        "type.icon, " +
+        "user_data.liked, " +
+        "user_data.watched, " +
+        "user_data.watchlist, " +
+        "UNIX_TIMESTAMP(user_data.last_recommended) * 1000 as last_recommended, " +
+        "type.view_external " +
+        "FROM item " +
+        "INNER JOIN topic ON topic.id = item.topic_id " +
+        "INNER JOIN type ON type.id = item.type_id " +
+        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
+        "WHERE item.language IN (?) AND topic.id = item.topic_id AND type.id = item.type_id " +
+        "AND item.reviewed = 1 ORDER BY item.id " +
+        "OFFSET " + page + " * 10 ROWS FETCH NEXT 10 ROWS ONLY";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, languages]);
+    return rows;
+}
+
 // email oder id?
 export async function getItemsByUser(userId: number): Promise<RowDataPacket[]> {
     const sql = "SELECT  item.id, " +
