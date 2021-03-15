@@ -1,23 +1,22 @@
 # REST-Endpunkte
 
 ```
-GET         https://appsterdb.ackermann.digital/api/items               GET list of all items, returns [Item]
-GET         https://appsterdb.ackermann.digital/api/items/10            GET list of 10 items, returns [Item]
-GET         https://appsterdb.ackermann.digital/api/items/10/123        GET list of 10 items starting with item 123, returns [Item]
+GET      (*)https://appsterdb.ackermann.digital/api/items               GET list of all items, returns [Item]
+GET      (*)https://appsterdb.ackermann.digital/api/items/10            GET list of 10 items, returns [Item]
+GET      (*)https://appsterdb.ackermann.digital/api/items/10/123        GET list of 10 items starting with item 123, returns [Item]
 GET       * https://appsterdb.ackermann.digital/api/items/review        GET items to review returns [Item]
-
 GET       * https://appsterdb.ackermann.digital/api/items/reviewed      GET users reviewed items returns [Item]
 GET       * https://appsterdb.ackermann.digital/api/items/created       GET users created items returns [Item]
 GET       * https://appsterdb.ackermann.digital/api/items/liked         GET users liked items returns [Item]
 GET       * https://appsterdb.ackermann.digital/api/items/watched       GET users watched items returns [Item]
 GET       * https://appsterdb.ackermann.digital/api/items/watchlist     GET users watchlist items returns [Item]
-GET       * https://appsterdb.ackermann.digital/api/items/status        POST update item (watchlist, liked, watched) expects Status
 
 GET       * https://appsterdb.ackermann.digital/api/item/review/136     GET review item 136
 GET         https://appsterdb.ackermann.digital/api/item/136            GET Item mit ID 136
 DELETE    * https://appsterdb.ackermann.digital/api/item/136            DELETE Item mit ID 136
 PUT       * https://appsterdb.ackermann.digital/api/item/136            EDIT Item mit ID 136, argument: Item
 POST      * https://appsterdb.ackermann.digital/api/item                ADD item expect: Item
+POST      * https://appsterdb.ackermann.digital/api/item/status        POST update item (watchlist, liked, watched) expects Status
 
 GET       * https://appsterdb.ackermann.digital/api/types           Liste aller Typen, returns [Type]
 PUT       * https://appsterdb.ackermann.digital/api/types           Ändert einen Typen, exprects Type
@@ -57,8 +56,8 @@ GET         https://appsterdb.ackermann.digital/api/languages       Languages, r
 GET         https://appsterdb.ackermann.digital/api/full            {type:[], information_data:[], topics:[]}
 ```
 
-Vorgehen:
-POST /login => Setzt Cookie der mitgeschickt werden muss um eingeloggt zu sein.
+* = login required
+(*) = login serves personalized data 
 
 # Datentypen:
 
