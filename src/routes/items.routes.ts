@@ -59,7 +59,7 @@ router.route('/watchlist')
     })
 
 router.route('/:limit/:startId?')
-    .get(authenticate, async (req: Request, res: Response) => {
+    .get(async (req: Request, res: Response) => {
         req.token = hasValidToken(req.cookies.jwt);
         if (req.cookies.jwt && req.token != false) {
             return res.status(200).json(
