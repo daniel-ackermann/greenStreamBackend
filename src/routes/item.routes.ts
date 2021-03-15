@@ -23,10 +23,10 @@ router.route('/')
         return res.json(data);
     });
 
-router.route('/browse/:page?')
+router.route('/browse/:limit/:startId?')
     .get(authenticate, async (req: Request, res: Response) => {
         return res.json(
-            await getSuggestedItems(parseInt(req.token.id, 10), parseInt(req.params.page) || 0, req.headers["accept-language"])
+            await getSuggestedItems(parseInt(req.token.id, 10), parseInt(req.params.startId) || 0, parseInt(req.params.limit), req.headers["accept-language"])
         )
     });
 

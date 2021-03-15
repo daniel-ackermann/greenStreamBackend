@@ -65,7 +65,7 @@ export async function getItemsWithUserData(userId: number, lang?: string): Promi
     return rows;
 }
 
-export async function getSuggestedItems(userId: number, page:number, lang?:string): Promise<RowDataPacket[]> {
+export async function getSuggestedItems(userId: number, id:number, limit: number, lang?:string): Promise<RowDataPacket[]> {
     const languages = parseLanguage(lang);
     const sql = "SELECT  item.id, " +
         "item.likes, " +
@@ -94,8 +94,8 @@ export async function getSuggestedItems(userId: number, page:number, lang?:strin
         "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
         "WHERE item.language IN (?) AND topic.id = item.topic_id AND type.id = item.type_id " +
         "AND item.reviewed = 1 ORDER BY item.id " +
-        "AND item.id > " + page * 10 +
-        "LIMIT 10";
+        "AND item.id > " + id + " " +
+        "LIMIT " + limit;
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, languages]);
     return rows;
 }
