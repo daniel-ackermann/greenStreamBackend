@@ -1,5 +1,5 @@
 import { Request, Response, Router } from 'express'
-import { getItems, getReviewedItemsByUser, getItemsByUser, getItemsToReview, getLikedItems, getWatchListItems, getWatchedItems, getItemsWithUserData, getSuggestedItems } from '../controllers/items.controller'
+import { getItems, getReviewedItemsByUser, getItemsByUser, getItemsToReview, getLikedItems, getWatchListItems, getWatchedItems, getItemsWithUserData, getSuggestedItems, getAllItems } from '../controllers/items.controller'
 import { authenticate, hasValidToken } from '../middleware';
 
 const router = Router();
@@ -11,7 +11,7 @@ router.route('/')
             const data = await getItemsWithUserData(req.token.id, req.headers["accept-language"]);
             return res.status(200).json(data)
         } else {
-            const data = await getItems(req.headers["accept-language"])
+            const data = await getAllItems(req.headers["accept-language"])
             return res.status(200).json(data);
         }
     })
@@ -60,9 +60,15 @@ router.route('/watchlist')
 
 router.route('/:limit/:startId?')
     .get(authenticate, async (req: Request, res: Response) => {
-        return res.json(
-            await getSuggestedItems(parseInt(req.token.id, 10), parseInt(req.params.startId) || 0, parseInt(req.params.limit), req.headers["accept-language"])
-        )
+        req.token = hasValidToken(req.cookies.jwt);
+        if (req.cookies.jwt && req.token != false) {
+            return res.status(200).json(
+                await getSuggestedItems(parseInt(req.token.id, 10), parseInt(req.params.startId) || 0, parseInt(req.params.limit), req.headers["accept-language"])
+            )
+        } else {
+            const data = await getItems(parseInt(req.params.startId) || 0, parseInt(req.params.limit), req.headers["accept-language"])
+            return res.status(200).json(data);
+        }
     });
 
 export default router;

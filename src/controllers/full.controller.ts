@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import pool from "../lib/db";
-import { getItems } from "./items.controller";
+import { getAllItems } from "./items.controller";
 import { getTopics } from "./topic.controller";
 import { getTypes } from "./type.controller";
 import { getLanguages } from "./language.controller";
@@ -14,7 +14,7 @@ export async function responseAll(req: Request, res: Response): Promise<Response
             return res.status(304).send(304);
         }
     }
-    const rows = await getItems(req.headers["accept-language"]);
+    const rows = await getAllItems(req.headers["accept-language"]);
     const topics = await getTopics(req.headers["accept-language"]);
     const types = await getTypes(req.headers["accept-language"]);
     return res.json({

@@ -2,7 +2,7 @@ import pool from '../lib/db'
 import { RowDataPacket } from 'mysql2';
 import { parseLanguage } from '../lib/helper';
 
-export async function getItems(lang?: string): Promise<RowDataPacket[]> {
+export async function getAllItems(lang?: string): Promise<RowDataPacket[]> {
     const languages = parseLanguage(lang);
     const sql = "SELECT  item.id, " +
         "item.likes, " +
@@ -25,8 +25,40 @@ export async function getItems(lang?: string): Promise<RowDataPacket[]> {
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
         "WHERE item.language IN (?) " +
-        "AND item.reviewed = 1  ORDER BY item.id";
+        "AND item.reviewed = 1 "+
+        "ORDER BY item.id";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [languages]);
+    return rows;
+}
+
+export async function getItems(id:number, limit: number, lang?: string): Promise<RowDataPacket[]> {
+    const languages = parseLanguage(lang);
+    const sql = "SELECT  item.id, " +
+        "item.likes, " +
+        "item.explanation_id, " +
+        "item.url, " +
+        "item.url, " +
+        "item.description, " +
+        "item.title, " +
+        "item.language, " +
+        "item.simple, " +
+        "item.reviewed, " +
+        "item.created_by_id, " +
+        "item.topic_id, " +
+        "item.type_id, " +
+        "topic.name as topic_name, " +
+        "type.name as type_name, " +
+        "type.icon, " +
+        "type.view_external " +
+        "FROM item " +
+        "INNER JOIN topic ON topic.id = item.topic_id " +
+        "INNER JOIN type ON type.id = item.type_id " +
+        "WHERE item.language IN (?) " +
+        "AND item.reviewed = 1 "+
+        "AND item.id > ? "+
+        "ORDER BY item.id " +
+        "LIMIT ? ";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [languages, id, limit]);
     return rows;
 }
 
