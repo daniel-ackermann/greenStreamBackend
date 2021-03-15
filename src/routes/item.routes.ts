@@ -1,6 +1,7 @@
 import { Request, Response, Router } from 'express'
 import { updateStatus, getItem, deleteItem, updateItem, getItemWithUserData, reviewItem } from '../controllers/item.controller';
 import { Item } from '../interface/item';
+import { UserData } from '../interface/userdata';
 import { authenticate, hasValidToken } from '../middleware';
 
 const router = Router();
@@ -46,5 +47,11 @@ router.route('/:itemId')
             )
         )
     });
+
+router.route('/status')
+    .post(authenticate, async (req: Request, res: Response) => {
+        updateStatus(parseInt(req.token.id, 10), req.body as UserData)
+        return res.json(200)
+    })
 
 export default router;

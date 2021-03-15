@@ -1,8 +1,7 @@
 import { Request, Response, Router } from 'express'
-import { addItem, updateStatus } from '../controllers/item.controller';
+import { addItem } from '../controllers/item.controller';
 import { getItems, getReviewedItemsByUser, getItemsByUser, getItemsToReview, getLikedItems, getWatchListItems, getWatchedItems, getItemsWithUserData, getSuggestedItems } from '../controllers/items.controller'
 import { Item } from '../interface/item';
-import { UserData } from '../interface/userdata';
 import { authenticate, hasValidToken } from '../middleware';
 
 const router = Router();
@@ -71,12 +70,6 @@ router.route('/watchlist')
         return res.json(
             await getWatchListItems(parseInt(req.token.id, 10))
         )
-    })
-
-router.route('/status')
-    .post(authenticate, async (req: Request, res: Response) => {
-        updateStatus(parseInt(req.token.id, 10), req.body as UserData)
-        return res.json(200)
     })
 
 export default router;
