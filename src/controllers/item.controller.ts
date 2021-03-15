@@ -94,7 +94,8 @@ export async function getSuggestedItems(userId: number, page:number, lang?:strin
         "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
         "WHERE item.language IN (?) AND topic.id = item.topic_id AND type.id = item.type_id " +
         "AND item.reviewed = 1 ORDER BY item.id " +
-        "OFFSET " + page + " * 10 ROWS FETCH NEXT 10 ROWS ONLY";
+        "AND item.id > " + page * 10 +
+        "LIMIT 10";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, languages]);
     return rows;
 }
