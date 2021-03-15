@@ -1,7 +1,5 @@
 import { Request, Response, Router } from 'express'
-import { addItem } from '../controllers/item.controller';
 import { getItems, getReviewedItemsByUser, getItemsByUser, getItemsToReview, getLikedItems, getWatchListItems, getWatchedItems, getItemsWithUserData, getSuggestedItems } from '../controllers/items.controller'
-import { Item } from '../interface/item';
 import { authenticate, hasValidToken } from '../middleware';
 
 const router = Router();
@@ -17,11 +15,6 @@ router.route('/')
             return res.status(200).json(data);
         }
     })
-    .post(authenticate, async (req: Request, res: Response) => {
-        req.body.created_by_id = req.token.id;
-        const data = await addItem(req.body as Item)
-        return res.json(data);
-    });
 
 router.route('/reviewed')
     .get(authenticate, async (req: Request, res: Response) => {

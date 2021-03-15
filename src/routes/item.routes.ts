@@ -1,10 +1,17 @@
 import { Request, Response, Router } from 'express'
-import { updateStatus, getItem, deleteItem, updateItem, getItemWithUserData, reviewItem } from '../controllers/item.controller';
+import { updateStatus, getItem, deleteItem, updateItem, getItemWithUserData, reviewItem, addItem } from '../controllers/item.controller';
 import { Item } from '../interface/item';
 import { UserData } from '../interface/userdata';
 import { authenticate, hasValidToken } from '../middleware';
 
 const router = Router();
+
+router.route('/')
+    .post(authenticate, async (req: Request, res: Response) => {
+        req.body.created_by_id = req.token.id;
+        const data = await addItem(req.body as Item)
+        return res.json(data);
+    });
 
 router.route('/review/:id')
     .get(authenticate, async (req: Request, res: Response) => {
