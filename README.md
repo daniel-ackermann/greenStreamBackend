@@ -136,7 +136,11 @@ Antwort (200):
 Im Fehlerfall ist die Antwort ein 403 Forbidden.
 
 ### Token mitsenden:
-Der Token ist als cookie unter dem namen `jwt` bei jedem weiteren Request der auf authentifizierung angewiesen ist mitzusenden.
+Der Token ist als cookie unter dem namen `jwt` bei jedem weiteren Request der auf Authentifizierung angewiesen ist als als Bearer mitzusenden.
+Der Inhalt des Cookies `jwt` sieht also wie folgt aus:
+```
+Bearer ${access_token} 
+```
 
 Ein Token ist 6 Stunden gültig.
 
