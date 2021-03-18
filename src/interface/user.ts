@@ -1,4 +1,3 @@
-import { Item } from "./item";
 import { UserData } from "./userdata";
 
 export interface User extends UserWithoutPassword {
@@ -12,17 +11,17 @@ export interface UserWithoutPassword{
     username?: string;
     show_in_app?: number;
     notification_time?: string;
-    language?: string[];
-    last_change?: any;
-    topics?: string[];
-    data?: UserData[];
+    language?: [string];
+    last_change?: Date;
+    topics?: [number];
+    data?: [UserData];
 }
 
 export interface UpdateUser {
     username?: string;
     show_in_app?: number;
     notification_time?: string;
-    language?: string[];
-    topics?: string[];
-    data?: UserData[];
+    language?: [string];
+    topics?: [number];
+    id: number;
 }
