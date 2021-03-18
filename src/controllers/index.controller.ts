@@ -10,6 +10,7 @@ import pool from '../lib/db';
 import { hasValidToken } from '../middleware';
 import { cookieToken } from '../interface/cookieToken';
 import { removeEmptyStrings } from '../lib/helper';
+import { getUserByEmail } from './user.controller';
 
 
 // import pool from '../lib/db';
@@ -75,24 +76,26 @@ export async function deleteAccount(email: string, token: cookieToken): Promise<
 
 export async function signIn(req: Request, res: Response): Promise<Response> {
     const user: User = req.body as User;
-    const [rows] = await pool.query<RowDataPacket[]>('SELECT username, password, id, email, role, language, show_in_app, notification_time, topics, UNIX_TIMESTAMP(last_change) * 1000 as last_user_change FROM user WHERE email = ?;', [user.email]);
-    if (rows.length == 1 && rows[0].email == user.email && await bcrypt.compare(user.password, rows[0].password)) {
+    // const [rows] = await pool.query<RowDataPacket[]>('SELECT username, password, id, email, role, language, show_in_app, notification_time, topics, UNIX_TIMESTAMP(last_change) * 1000 as last_user_change FROM user WHERE email = ?;', [user.email]);
+    const rows = getUserByEmail(user.email) as any;
+    
+    if (await bcrypt.compare(user.password, rows.password)) {
         const accessToken = jwt.sign({
             email: user.email,
-            role: rows[0].role,
-            id: rows[0].id
+            role: rows.role,
+            id: rows.id
         }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: "6 hours" });
         const expire = new Date(new Date().getTime() + 1000 * 60 * 60 * 6);
         res.cookie('jwt', accessToken, { expires: expire, sameSite: "lax", secure: true, httpOnly: true });
-        delete rows[0].password;
+        delete rows.password;
 
         // bad, but the app needs the token.
-        rows[0].access_token = accessToken;
-        rows[0].last_db_change = pool.getLastModified().getTime();
+        rows.access_token = accessToken;
+        rows.last_db_change = pool.getLastModified().getTime();
         // this should be done by database
-        rows[0].language = rows[0].language.split(',').filter(removeEmptyStrings);
-        rows[0].topics = rows[0].topics.split(',').filter(removeEmptyStrings);
-        return res.json(rows[0]);
+        rows.language = rows.language.split(',').filter(removeEmptyStrings);
+        rows.topics = rows.topics.split(',').filter(removeEmptyStrings);
+        return res.json(rows);
     } else {
         return res.status(403).json("Username or password incorrect");
     }
