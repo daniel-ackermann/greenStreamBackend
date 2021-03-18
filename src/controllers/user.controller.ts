@@ -14,7 +14,7 @@ export async function getUser(id: number | string): Promise<RowDataPacket[]> {
         "topics, " +
         "UNIX_TIMESTAMP(last_change) * 1000 as last_change, " +
         "language " +
-        "FROM user, user_topics" +
+        "FROM user " +
         "WHERE id = ?;"
     const [row] = await pool.query<RowDataPacket[]>(sql, [id]);
     const [topics] = await pool.query<RowDataPacket[]>("SELECT u.user, t.id, t.name, t.language from user_topics u, topic t WHERE u.topic = t.id AND u.user = ?;", [id]);
@@ -23,7 +23,7 @@ export async function getUser(id: number | string): Promise<RowDataPacket[]> {
     return row;
 }
 
-export async function getUserByEmail(id: string): Promise<RowDataPacket> {
+export async function getUserByEmail(email: string): Promise<RowDataPacket> {
     const sql = "SELECT username, " +
         "password, " +
         "id, " +
@@ -34,9 +34,9 @@ export async function getUserByEmail(id: string): Promise<RowDataPacket> {
         "topics, " +
         "UNIX_TIMESTAMP(last_change) * 1000 as last_change, " +
         "language " +
-        "FROM user, user_topics" +
+        "FROM user " +
         "WHERE email = ?;"
-    const [row] = await pool.query<RowDataPacket[]>(sql, [id]);
+    const [row] = await pool.query<RowDataPacket[]>(sql, [email]);
     const [topics] = await pool.query<RowDataPacket[]>("SELECT u.user, t.id, t.name, t.language from user_topics u, topic t WHERE u.topic = t.id AND u.user = ?;", [row[0].id]);
     row[0].language = row[0].language.split(',').filter(removeEmptyStrings);
     row[0].topics = topics;

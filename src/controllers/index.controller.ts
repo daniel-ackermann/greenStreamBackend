@@ -76,8 +76,7 @@ export async function deleteAccount(email: string, token: cookieToken): Promise<
 
 export async function signIn(req: Request, res: Response): Promise<Response> {
     const user: User = req.body as User;
-    // const [rows] = await pool.query<RowDataPacket[]>('SELECT username, password, id, email, role, language, show_in_app, notification_time, topics, UNIX_TIMESTAMP(last_change) * 1000 as last_user_change FROM user WHERE email = ?;', [user.email]);
-    const rows = getUserByEmail(user.email) as any;
+    const rows = await getUserByEmail(user.email) as any;
     
     if (await bcrypt.compare(user.password, rows.password)) {
         const accessToken = jwt.sign({
@@ -92,9 +91,6 @@ export async function signIn(req: Request, res: Response): Promise<Response> {
         // bad, but the app needs the token.
         rows.access_token = accessToken;
         rows.last_db_change = pool.getLastModified().getTime();
-        // this should be done by database
-        rows.language = rows.language.split(',').filter(removeEmptyStrings);
-        rows.topics = rows.topics.split(',').filter(removeEmptyStrings);
         return res.json(rows);
     } else {
         return res.status(403).json("Username or password incorrect");
