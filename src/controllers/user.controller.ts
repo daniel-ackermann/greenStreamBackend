@@ -6,7 +6,8 @@ import { removeEmptyStrings } from "../lib/helper";
 export async function getUser(id: number | string): Promise<RowDataPacket[]> {
     const sql = "SELECT username, " +
         "password, " +
-        "id, email, " +
+        "id, " +
+        "email, " +
         "role, " +
         "show_in_app, " +
         "notification_time, " +
@@ -20,6 +21,26 @@ export async function getUser(id: number | string): Promise<RowDataPacket[]> {
     row[0].language = row[0].language.split(',').filter(removeEmptyStrings);
     row[0].topics = topics;
     return row;
+}
+
+export async function getUserByEmail(id: string): Promise<RowDataPacket> {
+    const sql = "SELECT username, " +
+        "password, " +
+        "id, " +
+        "email, " +
+        "role, " +
+        "show_in_app, " +
+        "notification_time, " +
+        "topics, " +
+        "UNIX_TIMESTAMP(last_change) * 1000 as last_change, " +
+        "language " +
+        "FROM user, user_topics" +
+        "WHERE email = ?;"
+    const [row] = await pool.query<RowDataPacket[]>(sql, [id]);
+    const [topics] = await pool.query<RowDataPacket[]>("SELECT u.user, t.id, t.name, t.language from user_topics u, topic t WHERE u.topic = t.id AND u.user = ?;", [row[0].id]);
+    row[0].language = row[0].language.split(',').filter(removeEmptyStrings);
+    row[0].topics = topics;
+    return row[0];
 }
 
 export async function getUserWithoutPassword(id: number | string): Promise<RowDataPacket[]> {
