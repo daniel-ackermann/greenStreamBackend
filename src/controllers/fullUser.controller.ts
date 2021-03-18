@@ -6,7 +6,7 @@ import { updateStatus } from "./item.controller";
 
 export async function getFullUser(userId: number): Promise<UserWithoutPassword>{
     const [ user ] = await getUserWithoutPassword(userId) as UserWithoutPassword[];
-    user.data = await getInteractedItemsByUser(userId) as UserData[];
+    user.data = await getInteractedItemsByUser(userId) as [UserData];
     return user;
 }
 
@@ -18,6 +18,7 @@ export async function saveFullUser(userId:number, data: UserWithoutPassword): Pr
         topics: data.topics,
         language: data.language,
         email: data.email,
+        id: userId
     }
     updateUserById(userId, user);
     (data.data|| []).forEach((item: UserData) => {
