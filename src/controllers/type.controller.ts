@@ -23,7 +23,7 @@ export async function addType(req: Request, res: Response): Promise<Response> {
     });
 }
 
-export async function getTypes(language?: string): Promise<RowDataPacket> {
+export async function getTypes(language?: string): Promise<RowDataPacket[]> {
     const languages = parseLanguage(language);
     const sql = "SELECT  type.id, " +
         "type.name, " +
@@ -32,7 +32,7 @@ export async function getTypes(language?: string): Promise<RowDataPacket> {
         "type " +
         "WHERE language IN (?) ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [languages]);
-    return rows[0];
+    return rows;
 }
 
 export async function deleteType(req: Request, res: Response): Promise<Response> {
