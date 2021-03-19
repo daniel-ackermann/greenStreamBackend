@@ -17,8 +17,8 @@ export async function getUser(id: number | string): Promise<RowDataPacket[]> {
         "FROM user " +
         "WHERE id = ?;"
     const [row] = await pool.query<RowDataPacket[]>(sql, [id]);
-    const [topics] = await pool.query<RowDataPacket[]>("SELECT topic.*, case when u.topic = topic.id then true else false end as selected from user_topics u RIGHT JOIN topic ON (u.topic = topic.id) where (u.user = 22 OR u.user is null) AND topic.language IN ?;", [id, row[0].language]);
     row[0].language = row[0].language.split(',').filter(removeEmptyStrings);
+    const [topics] = await pool.query<RowDataPacket[]>("SELECT topic.*, case when u.topic = topic.id then true else false end as selected from user_topics u RIGHT JOIN topic ON (u.topic = topic.id) where (u.user = ? OR u.user is null) AND topic.language IN ?;", [id, row[0].language]);
     row[0].topics = topics;
     return row;
 }
@@ -37,8 +37,8 @@ export async function getUserByEmail(email: string): Promise<RowDataPacket> {
         "FROM user " +
         "WHERE email = ?;"
     const [row] = await pool.query<RowDataPacket[]>(sql, [email]);
-    const [topics] = await pool.query<RowDataPacket[]>("SELECT topic.*, case when u.topic = topic.id then true else false end as selected from user_topics u RIGHT JOIN topic ON (u.topic = topic.id) where (u.user = 22 OR u.user is null) AND topic.language IN ?;", [email, row[0].language]);
     row[0].language = row[0].language.split(',').filter(removeEmptyStrings);
+    const [topics] = await pool.query<RowDataPacket[]>("SELECT topic.*, case when u.topic = topic.id then true else false end as selected from user_topics u RIGHT JOIN topic ON (u.topic = topic.id) where (u.user = ? OR u.user is null) AND topic.language IN ?;", [row[0].id, row[0].language]);
     row[0].topics = topics;
     return row[0];
 }
