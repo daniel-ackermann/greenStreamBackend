@@ -5,7 +5,7 @@ import { Item } from "../interface/item";
 export async function importJSON(req: Request, res: Response): Promise<Response> {
     const data = JSON.parse(req.body.data);
     for(let index = 0; index < data.length; index++ ){
-        let item = data[index];
+        const item = data[index];
         if (item.title == '' || item.description == '') {
             continue;
         }

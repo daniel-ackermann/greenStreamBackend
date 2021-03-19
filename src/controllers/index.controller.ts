@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import { User } from '../interface/user'
+import { User, UserWithPassword } from '../interface/user'
 import * as nodemailer from 'nodemailer';
 import TokenService from '../services/token.service';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
@@ -9,7 +9,7 @@ import 'dotenv/config'
 import pool from '../lib/db';
 import { hasValidToken } from '../middleware';
 import { cookieToken } from '../interface/cookieToken';
-import { getUserByEmail } from './user.controller';
+import { getUserByEmail, getUserByEmailWithPassword } from './user.controller';
 
 
 // import pool from '../lib/db';
@@ -44,20 +44,13 @@ export async function checkStatus(req: Request, res: Response): Promise<Response
 }
 
 export async function registerAccount(req: Request, res: Response): Promise<Response> {
-    const user: User = {
-        username: req.body.username || "",
-        password: req.body.password || "",
-        email: req.body.email,
-        role: req.body.role,
-        id: req.body.id || 0
-    }
-    const passwordHash = bcrypt.hashSync(user.password, 10);
-    const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM user WHERE email = ?;', [user.email]);
+    const passwordHash = bcrypt.hashSync(req.body.password, 10);
+    const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM user WHERE email = ?;', [req.body.email]);
     if (rows.length > 0) {
         console.log("Nutzer existiert bereits");
         return res.status(403).json("Account existiert bereits!");
     }
-    await pool.execute('INSERT INTO user (`username`, `password`, `email`, `role`) VALUES (?, ?, ?, ?);', [user.username, passwordHash.toString(), user.email, user.role]).catch(err => {
+    await pool.execute('INSERT INTO user (`username`, `password`, `email`, `role`) VALUES (?, ?, ?, ?);', [req.body.username, passwordHash.toString(), req.body.email, req.body.role]).catch(err => {
         console.log(err);
     })
     return res.sendStatus(200);
@@ -74,8 +67,8 @@ export async function deleteAccount(email: string, token: cookieToken): Promise<
 }
 
 export async function signIn(req: Request, res: Response): Promise<Response> {
-    const user: User = req.body as User;
-    const rows = await getUserByEmail(user.email) as any;
+    const user: UserWithPassword = req.body as UserWithPassword;
+    const rows = await getUserByEmailWithPassword(user.email) as any;
     
     if (await bcrypt.compare(user.password, rows.password)) {
         const accessToken = jwt.sign({
@@ -85,12 +78,13 @@ export async function signIn(req: Request, res: Response): Promise<Response> {
         }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: "6 hours" });
         const expire = new Date(new Date().getTime() + 1000 * 60 * 60 * 6);
         res.cookie('jwt', accessToken, { expires: expire, sameSite: "lax", secure: true, httpOnly: true });
-        delete rows.password;
+        const result: any = rows;
+        delete result.password;
 
         // bad, but the app needs the token.
-        rows.access_token = accessToken;
-        rows.last_db_change = pool.getLastModified().getTime();
-        return res.json(rows);
+        result.access_token = accessToken;
+        result.last_db_change = pool.getLastModified().getTime();
+        return res.json(result);
     } else {
         return res.status(403).json("Username or password incorrect");
     }

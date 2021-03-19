@@ -1,10 +1,10 @@
 import { UserData } from "./userdata";
 
-export interface User extends UserWithoutPassword {
+export interface UserWithPassword extends User {
     password: string;
 }
 
-export interface UserWithoutPassword{
+export interface User{
     email: string;
     role: string;
     id: number;

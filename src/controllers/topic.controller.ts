@@ -12,7 +12,7 @@ export async function getTopic(req: Request, res: Response): Promise<Response> {
         "topic " +
         "WHERE " +
         "id = ?;", [req.params.typeId]);
-    return res.json(rows);
+    return res.json(rows[0]);
 }
 
 export async function addTopic(req: Request, res: Response): Promise<Response> {
@@ -23,8 +23,8 @@ export async function addTopic(req: Request, res: Response): Promise<Response> {
 }
 
 export async function getTopics(language?: string): Promise<RowDataPacket[]> {
-    let languages = parseLanguage(language);
-    let sql = "SELECT  id, " +
+    const languages = parseLanguage(language);
+    const sql = "SELECT  id, " +
         "name " +
         "FROM " +
         "topic " +

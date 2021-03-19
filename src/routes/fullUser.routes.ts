@@ -1,6 +1,6 @@
 import { Request, Response, Router } from 'express'
 import { getFullUser, saveFullUser } from '../controllers/fullUser.controller';
-import { UserWithoutPassword } from '../interface/user';
+import { User } from '../interface/user';
 import pool from '../lib/db';
 import { authenticate } from '../middleware';
 
@@ -21,7 +21,7 @@ router.route('/')
     })
     .post(authenticate, async (req: Request, res: Response): Promise<Response> => {
         return res.status(200).json(
-            await saveFullUser(parseInt(req.token.id), req.body as UserWithoutPassword)
+            await saveFullUser(parseInt(req.token.id), req.body as User)
         )
     });
 

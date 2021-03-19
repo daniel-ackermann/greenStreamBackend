@@ -9,7 +9,7 @@ export async function addItem(item: Item): Promise<Item> {
     return item;
 }
 
-export async function getItem(id: number): Promise<RowDataPacket[]> {
+export async function getItem(id: number): Promise<RowDataPacket> {
     const sql = "SELECT     item.id, " +
         "item.likes, " +
         "item.explanation_id, " +
@@ -31,7 +31,7 @@ export async function getItem(id: number): Promise<RowDataPacket[]> {
         "INNER JOIN type ON type.id = item.type_id " +
         "WHERE item.id=?;";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [id]);
-    return rows;
+    return rows[0];
 }
 
 export async function updateStatus(userId: number, data: UserData): Promise<number> {
