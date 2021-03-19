@@ -2,6 +2,7 @@ import { RowDataPacket } from "mysql2";
 import { UpdateUser, User } from "../interface/user";
 import pool from "../lib/db";
 import { removeEmptyStrings } from "../lib/helper";
+import { updateUserLanguages } from "./user.language.controller";
 import { updateUserTopics } from "./user.topic.controller";
 
 
@@ -83,7 +84,7 @@ export async function updateUserById(id: number, user: UpdateUser): Promise<void
         updateUserTopics(id, user.topics);
     }
     if(user.languages !== undefined){
-        updateUserTopics(id, user.languages);
+        updateUserLanguages(id, user.languages);
     }
     await pool.query('UPDATE user SET username = ? WHERE id = ?', [user.username, id]);
 }
