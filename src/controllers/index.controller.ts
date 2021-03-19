@@ -9,7 +9,6 @@ import 'dotenv/config'
 import pool from '../lib/db';
 import { hasValidToken } from '../middleware';
 import { cookieToken } from '../interface/cookieToken';
-import { removeEmptyStrings } from '../lib/helper';
 import { getUserByEmail } from './user.controller';
 
 
@@ -37,7 +36,7 @@ export async function checkStatus(req: Request, res: Response): Promise<Response
         const token: false | cookieToken = hasValidToken(authHeader);
         if (token != false) {
             return res.status(200).json(
-                await getUser(token.email)
+                await getUserByEmail(token.email)
             );
         }
     }
@@ -138,9 +137,4 @@ export async function sendEmail(req: Request, res: Response): Promise<Response> 
     });
 
     return res.status(200).send("200");
-}
-
-async function getUser(email: string): Promise<RowDataPacket> {
-    const [rows] = await pool.query<RowDataPacket[]>('SELECT username, id, email, role, language FROM user WHERE email = ?;', [email]);
-    return rows[0];
 }
