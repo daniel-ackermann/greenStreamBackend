@@ -11,14 +11,17 @@ export async function getUser(id: number | string): Promise<RowDataPacket[]> {
         "role, " +
         "show_in_app, " +
         "notification_time, " +
-        "topics, " +
         "UNIX_TIMESTAMP(last_change) * 1000 as last_change, " +
         "language " +
         "FROM user " +
         "WHERE id = ?;"
     const [row] = await pool.query<RowDataPacket[]>(sql, [id]);
     row[0].language = row[0].language.split(',').filter(removeEmptyStrings);
-    const [topics] = await pool.query<RowDataPacket[]>("SELECT topic.*, case when u.topic = topic.id then true else false end as selected from user_topics u RIGHT JOIN topic ON (u.topic = topic.id) where (u.user = ? OR u.user is null) AND topic.language IN ?;", [id, row[0].language]);
+    const query = "SELECT topic.*, " +
+        "case when u.topic = topic.id then true else false end as selected " +
+        "from user_topics u " +
+        "RIGHT JOIN topic ON (u.topic = topic.id AND u.user = ?) ";
+    const [topics] = await pool.query<RowDataPacket[]>(query, [id]);
     row[0].topics = topics;
     return row;
 }
@@ -31,22 +34,39 @@ export async function getUserByEmail(email: string): Promise<RowDataPacket> {
         "role, " +
         "show_in_app, " +
         "notification_time, " +
-        "topics, " +
         "UNIX_TIMESTAMP(last_change) * 1000 as last_change, " +
         "language " +
         "FROM user " +
         "WHERE email = ?;"
     const [row] = await pool.query<RowDataPacket[]>(sql, [email]);
     row[0].language = row[0].language.split(',').filter(removeEmptyStrings);
-    const [topics] = await pool.query<RowDataPacket[]>("SELECT topic.*, case when u.topic = topic.id then true else false end as selected from user_topics u RIGHT JOIN topic ON (u.topic = topic.id) where (u.user = ? OR u.user is null) AND topic.language IN ?;", [row[0].id, row[0].language]);
+    const query = "SELECT topic.*, " +
+        "case when u.topic = topic.id then true else false end as selected " +
+        "from user_topics u " +
+        "RIGHT JOIN topic ON (u.topic = topic.id AND u.user = ?)";
+    const [topics] = await pool.query<RowDataPacket[]>(query, [row[0].id]);
     row[0].topics = topics;
     return row[0];
 }
 
 export async function getUserWithoutPassword(id: number | string): Promise<RowDataPacket[]> {
-    const [row] = await pool.query<RowDataPacket[]>("SELECT username, id, email, role, show_in_app, notification_time, topics, UNIX_TIMESTAMP(last_change) * 1000 as last_change, language FROM user WHERE id = ?;", [id]);
+    const sql = "SELECT username, " +
+        "id, " +
+        "email, " +
+        "role, " +
+        "show_in_app, " +
+        "notification_time, " +
+        "UNIX_TIMESTAMP(last_change) * 1000 as last_change, " +
+        "language " +
+        "FROM user " +
+        "WHERE id = ?;";
+    const [row] = await pool.query<RowDataPacket[]>(sql, [id]);
     row[0].language = row[0].language.split(',').filter(removeEmptyStrings);
-    const [topics] = await pool.query<RowDataPacket[]>("SELECT t.*, u.topic = topic.id as selected from user_topics u RIGHT JOIN topic ON (u.topic = topic.id) WHERE u.user = ? AND topic.language IN ?;", [id, row[0].language]);
+    const query = "SELECT t.*, " +
+        "case when u.topic = topic.id then true else false end as selected " +
+        "from user_topics u " +
+        "RIGHT JOIN topic ON (u.topic = topic.id AND u.user = ?);";
+    const [topics] = await pool.query<RowDataPacket[]>(query, [id]);
     row[0].topics = topics;
     return row;
 }
