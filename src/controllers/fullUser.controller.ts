@@ -16,7 +16,7 @@ export async function saveFullUser(userId:number, data: User): Promise<void> {
         show_in_app: data.show_in_app,
         notification_time: data.notification_time,
         topics: data.topics,
-        language: data.language,
+        languages: data.languages,
         email: data.email,
         id: userId
     }
