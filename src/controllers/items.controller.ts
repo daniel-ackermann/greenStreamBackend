@@ -2,6 +2,9 @@ import pool from '../lib/db'
 import { RowDataPacket } from 'mysql2';
 import { parseLanguage } from '../lib/helper';
 
+// Designentscheidung: https://mariadb.com/kb/en/pagination-optimization/
+
+
 export async function getAllItems(lang?: string): Promise<RowDataPacket[]> {
     const languages = parseLanguage(lang);
     const sql = "SELECT  item.id, " +
@@ -121,13 +124,15 @@ export async function getSuggestedItems(userId: number, id:number, limit: number
         "FROM item " +
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
+        "INNER JOIN user_topics ON user_topics.topic = item.topic_id " +
         "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
-        "WHERE item.language IN (?) AND topic.id = item.topic_id AND type.id = item.type_id " +
+        "WHERE item.language IN (?) " +
         "AND item.reviewed = 1 " +
         "AND item.id > ? " +
+        "AND user_topics.user = ? " +
         "ORDER BY item.id " +
         "LIMIT ? ";
-    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, languages, id, limit]);
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, languages, id, userId, limit]);
     return rows;
 }
 
