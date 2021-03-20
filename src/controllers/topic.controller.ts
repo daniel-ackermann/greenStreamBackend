@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { Request, Response } from '../interface/custom.request'
 import { RowDataPacket } from 'mysql2';
 import pool from '../lib/db'
 import { Item } from '../interface/item'

@@ -1,4 +1,5 @@
-import { Request, Response, Router } from 'express'
+import { Router } from 'express'
+import { Request, Response } from '../interface/custom.request'
 import { getType, getTypes, addType, deleteType, updateType } from '../controllers/type.controller'
 import { authenticate } from '../middleware';
 

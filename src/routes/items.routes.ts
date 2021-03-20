@@ -1,4 +1,5 @@
-import { Request, Response, Router } from 'express'
+import { Router } from 'express'
+import { Request, Response } from '../interface/custom.request'
 import { getItems, getReviewedItemsByUser, getItemsByUser, getItemsToReview, getLikedItems, getWatchListItems, getWatchedItems, getItemsWithUserData, getSuggestedItems, getAllItems } from '../controllers/items.controller'
 import { authenticate, hasValidToken } from '../middleware';
 

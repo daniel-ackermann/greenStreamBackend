@@ -1,4 +1,5 @@
-import { Request, Response, Router } from 'express'
+import { Router } from 'express'
+import { Request, Response } from '../interface/custom.request'
 import { getTopic, getTopics, addTopic, deleteTopic, updateTopic } from '../controllers/topic.controller'
 import { authenticate } from '../middleware';
 

@@ -3,7 +3,7 @@ import pool from "../lib/db";
 
 
 export async function updateUserTopics(user: number, topics: number[]):Promise<void> {
-    if(!topics || topics.length){
+    if(!topics || !topics.length){
         topics = environment.defaultTopics;
     }
     await pool.query("DELETE FROM user_topics WHERE user = ?", [user]);

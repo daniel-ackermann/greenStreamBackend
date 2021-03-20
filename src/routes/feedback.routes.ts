@@ -1,4 +1,5 @@
-import { Request, Response, Router } from 'express'
+import { Router } from 'express'
+import { Request, Response } from '../interface/custom.request'
 import { addFeedback, getFeedback, getFeedbackByItem, getFeedbacks, removeFeedback } from '../controllers/feedback.controller';
 import { authenticate } from '../middleware';
 

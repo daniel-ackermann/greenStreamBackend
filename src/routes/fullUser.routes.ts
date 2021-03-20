@@ -1,4 +1,5 @@
-import { Request, Response, Router } from 'express'
+import { Router } from 'express'
+import { Request, Response } from '../interface/custom.request'
 import { getFullUser, saveFullUser } from '../controllers/fullUser.controller';
 import { User } from '../interface/user';
 import pool from '../lib/db';

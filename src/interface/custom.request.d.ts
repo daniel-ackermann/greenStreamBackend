@@ -1,8 +1,8 @@
-declare namespace Express {
-    export interface Request {
-        token?: any;
-    }
-    export interface Response {
-        token?: any;
-    }
+import { Response, Request } from "express";
+
+export interface Request extends Request {
+    token?: false|cookieToken;
+}
+export interface Response extends Response {
+    token?: false|cookieToken;
 }

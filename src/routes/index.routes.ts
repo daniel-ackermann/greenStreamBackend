@@ -1,8 +1,9 @@
 
-import { Request, Response, Router } from 'express'
+import { Router } from 'express'
 import { checkStatus, deleteAccount, registerAccount, sendEmail, signIn, signOut } from '../controllers/index.controller'
 import { saveNewPassword } from '../controllers/password.controller';
 import { cookieToken } from '../interface/cookieToken';
+import { Request, Response } from '../interface/custom.request';
 import { authenticate } from '../middleware';
 import TokenService from '../services/token.service';
 

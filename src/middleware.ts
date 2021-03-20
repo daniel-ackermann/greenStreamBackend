@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken"
 import "dotenv/config"
-import { Response, NextFunction, Request } from "express";
+import { Response, Request } from "./interface/custom.request";
 import { cookieToken } from "./interface/cookieToken";
+import { NextFunction } from "express";
 
 export function authenticate(req: Request, res: Response, next: NextFunction): void|Response{
     const authHeader = req.cookies.jwt;

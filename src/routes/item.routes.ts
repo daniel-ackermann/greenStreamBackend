@@ -1,4 +1,5 @@
-import { Request, Response, Router } from 'express'
+import { Router } from 'express'
+import { Request, Response } from '../interface/custom.request'
 import { updateStatus, getItem, deleteItem, updateItem, getItemWithUserData, reviewItem, addItem } from '../controllers/item.controller';
 import { Item } from '../interface/item';
 import { UserData } from '../interface/userdata';

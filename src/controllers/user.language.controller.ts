@@ -3,7 +3,7 @@ import pool from "../lib/db";
 
 
 export async function updateUserLanguages(user: number, languages: string[]):Promise<void> {
-    if(!languages || languages.length){
+    if(!languages || !languages.length){
         languages = environment.defaultLanguages;
     }
     await pool.query("DELETE FROM user_languages WHERE user = ?", [user]);

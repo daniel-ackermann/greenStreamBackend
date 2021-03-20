@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { Request, Response } from '../interface/custom.request'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { User, UserWithPassword } from '../interface/user'
