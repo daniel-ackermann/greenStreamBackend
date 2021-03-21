@@ -38,6 +38,11 @@ export class App {
             res.header('Access-Control-Allow-Origin', req.headers.origin);
             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
             res.header("Access-Control-Allow-Methods", "*");
+            res.header("Strict-Transport-Security", "max-age=63072000");
+            res.header("Content-Security-Policy", "default-src https");
+            res.header("X-Content-Type-Options", "nosniff");
+            res.header("X-Frame-Options", "DENY");
+            res.header("X-XSS-Protection", "1; mode=block");
             next();
         });
         this.app.use(express.urlencoded({ extended: true }));
