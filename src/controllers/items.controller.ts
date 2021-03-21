@@ -1,6 +1,7 @@
 import pool from '../lib/db'
 import { RowDataPacket } from 'mysql2';
 import { parseLanguage } from '../lib/helper';
+import { environment } from '../env/environment';
 
 // Designentscheidung: https://mariadb.com/kb/en/pagination-optimization/
 
@@ -34,7 +35,10 @@ export async function getAllItems(lang?: string): Promise<RowDataPacket[]> {
     return rows;
 }
 
-export async function getItems(id:number, limit: number, lang?: string): Promise<RowDataPacket[]> {
+export async function getItems(id:number, limit: number, lang = "", topics: string[]| number[]): Promise<RowDataPacket[]> {
+    if(!topics || !topics.length){
+        topics = environment.defaultTopics;
+    }
     const languages = parseLanguage(lang);
     const sql = "SELECT  item.id, " +
         "item.likes, " +
@@ -59,13 +63,17 @@ export async function getItems(id:number, limit: number, lang?: string): Promise
         "WHERE item.language IN (?) " +
         "AND item.reviewed = 1 "+
         "AND item.id > ? "+
+        "AND item.topic_id IN (?) "+
         "ORDER BY item.id " +
         "LIMIT ? ";
-    const [rows] = await pool.query<RowDataPacket[]>(sql, [languages, id, limit]);
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [languages, id, topics, limit]);
     return rows;
 }
 
-export async function getItemsWithUserData(userId: number, lang?: string): Promise<RowDataPacket[]> {
+export async function getItemsWithUserData(userId: number, id:number, limit: number,topics: string[]|number[],  lang?: string): Promise<RowDataPacket[]> {
+    if(!topics || !topics.length){
+        topics = environment.defaultTopics;
+    }
     const languages = parseLanguage(lang);
     const sql = "SELECT  item.id, " +
         "item.likes, " +
@@ -92,9 +100,13 @@ export async function getItemsWithUserData(userId: number, lang?: string): Promi
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
         "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
-        "WHERE item.language IN (?) AND topic.id = item.topic_id AND type.id = item.type_id " +
-        "AND item.reviewed = 1 ORDER BY item.id";
-    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, languages]);
+        "WHERE item.language IN (?) " +
+        "AND item.topic_id IN (?) " +
+        "AND item.reviewed = 1 " +
+        "AND item.id > ? " +
+        "ORDER BY item.id " +
+        "LIMIT ?";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, languages, topics, id, limit]);
     return rows;
 }
 
