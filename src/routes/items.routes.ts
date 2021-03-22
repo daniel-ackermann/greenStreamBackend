@@ -1,49 +1,67 @@
 import { Router } from 'express'
 import { Request, Response } from '../interface/custom.request'
-import { getItems, getReviewedItemsByUser, getItemsByUser, getItemsToReview, getLikedItems, getWatchListItems, getWatchedItems, getItemsWithUserData, getSuggestedItems, getAllItems } from '../controllers/items.controller'
+import { getItems, getReviewedItemsByUser, getItemsByUser, getItemsToReview, getLikedItems, getWatchListItems, getWatchedItems, getItemsWithUserData, getSuggestedItems } from '../controllers/items.controller'
 import { authenticate, hasValidToken } from '../middleware';
 
 const router = Router();
 
-router.route('/reviewed')
+router.route('/reviewed/:limit/:startId?')
     .get(authenticate, async (req: Request, res: Response) => {
+        if(typeof req.query.topics === "string" && req.query.topics.length > 0){
+            req.query.topics = req.query.topics.split(",");
+        }
         return res.json(
-            await getReviewedItemsByUser(parseInt(req.token.id, 10))
+            await getReviewedItemsByUser(parseInt(req.token.id, 10), parseInt(req.params.limit), parseInt(req.params.startId), req.query.topics as string[])
         );
     });
 
-router.route('/review')
+router.route('/review/:limit/:startId?')
     .get(authenticate, async (req: Request, res: Response) => {
+        if(typeof req.query.topics === "string" && req.query.topics.length > 0){
+            req.query.topics = req.query.topics.split(",");
+        }
         res.json(
-            await getItemsToReview(req.token.id)
+            await getItemsToReview(req.token.id, parseInt(req.params.limit), parseInt(req.params.startId), req.query.topics as string[])
         );
     })
 
-router.route('/created')
+router.route('/created/:limit/:startId?')
     .get(authenticate, async (req: Request, res: Response) => {
+        if(typeof req.query.topics === "string" && req.query.topics.length > 0){
+            req.query.topics = req.query.topics.split(",");
+        }
         return res.json(
-            await getItemsByUser(parseInt(req.token.id, 10))
+            await getItemsByUser(parseInt(req.token.id, 10), parseInt(req.params.limit), parseInt(req.params.startId), req.query.topics as string[])
         )
     })
 
-router.route('/liked')
+router.route('/liked/:limit/:startId?')
     .get(authenticate, async (req: Request, res: Response) => {
+        if(typeof req.query.topics === "string" && req.query.topics.length > 0){
+            req.query.topics = req.query.topics.split(",");
+        }
         return res.json(
-            await getLikedItems(parseInt(req.token.id, 10))
+            await getLikedItems(parseInt(req.token.id, 10), parseInt(req.params.limit), parseInt(req.params.startId), req.query.topics as string[])
         )
     })
 
-router.route('/watched')
+router.route('/watched/:limit/:startId?')
     .get(authenticate, async (req: Request, res: Response) => {
+        if(typeof req.query.topics === "string" && req.query.topics.length > 0){
+            req.query.topics = req.query.topics.split(",");
+        }
         return res.json(
-            await getWatchedItems(parseInt(req.token.id, 10))
+            await getWatchedItems(parseInt(req.token.id, 10), parseInt(req.params.limit), parseInt(req.params.startId), req.query.topics as string[])
         )
     })
 
-router.route('/watchlist')
+router.route('/watchlist/:limit/:startId?')
     .get(authenticate, async (req: Request, res: Response) => {
+        if(typeof req.query.topics === "string" && req.query.topics.length > 0){
+            req.query.topics = req.query.topics.split(",");
+        }
         return res.json(
-            await getWatchListItems(parseInt(req.token.id, 10))
+            await getWatchListItems(parseInt(req.token.id, 10), parseInt(req.params.limit), parseInt(req.params.startId), req.query.topics as string[])
         )
     })
 

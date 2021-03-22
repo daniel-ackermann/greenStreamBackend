@@ -30,7 +30,7 @@ export async function getAllItems(lang?: string): Promise<RowDataPacket[]> {
         "INNER JOIN type ON type.id = item.type_id " +
         "WHERE item.language IN (?) " +
         "AND item.reviewed = 1 "+
-        "ORDER BY item.id";
+        "ORDER BY item.id ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [languages]);
     return rows;
 }
@@ -61,9 +61,9 @@ export async function getItems(id:number, limit: number, lang = "", topics: stri
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
         "WHERE item.language IN (?) " +
-        "AND item.reviewed = 1 "+
-        "AND item.id > ? "+
-        "AND item.topic_id IN (?) "+
+        "AND item.reviewed = 1 " +
+        "AND item.id > ? " +
+        "AND item.topic_id IN (?) " +
         "ORDER BY item.id " +
         "LIMIT ? ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [languages, id, topics, limit]);
@@ -105,7 +105,7 @@ export async function getItemsWithUserData(userId: number, id:number, limit: num
         "AND item.reviewed = 1 " +
         "AND item.id > ? " +
         "ORDER BY item.id " +
-        "LIMIT ?";
+        "LIMIT ? ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, languages, topics, id, limit]);
     return rows;
 }
@@ -149,7 +149,10 @@ export async function getSuggestedItems(userId: number, id:number, limit: number
 }
 
 // email oder id?
-export async function getItemsByUser(userId: number): Promise<RowDataPacket[]> {
+export async function getItemsByUser(userId: number, limit:number, startId: number,topics: string[]|number[]): Promise<RowDataPacket[]> {
+    if(!topics || !topics.length){
+        topics = environment.defaultTopics;
+    }
     const sql = "SELECT  item.id, " +
         "item.explanation_id, " +
         "item.url, " +
@@ -173,8 +176,14 @@ export async function getItemsByUser(userId: number): Promise<RowDataPacket[]> {
         "INNER JOIN type ON type.id = item.type_id " +
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
-        "WHERE item.created_by_id = ? AND item.topic_id = topic.id AND type.id = item.type_id ORDER BY item.id";
-    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, userId]);
+        "WHERE item.created_by_id = ? " +
+        "AND item.topic_id = topic.id " +
+        "AND type.id = item.type_id " +
+        "AND item.id > ? " +
+        "AND item.topic_id IN (?) " +
+        "ORDER BY item.id " +
+        "LIMIT ? ";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, userId, startId,  topics, limit]);
     return rows;
 }
 
@@ -191,7 +200,10 @@ export async function getInteractedItemsByUser(userId: number): Promise<RowDataP
     return rows;
 }
 
-export async function getLikedItems(id: number): Promise<RowDataPacket[]> {
+export async function getLikedItems(userId: number, limit:number, startId: number, topics: string[]|number[]): Promise<RowDataPacket[]> {
+    if(!topics || !topics.length){
+        topics = environment.defaultTopics;
+    }
     const sql = "SELECT  item.id, " +
         "item.explanation_id, " +
         "item.url, " +
@@ -214,12 +226,21 @@ export async function getLikedItems(id: number): Promise<RowDataPacket[]> {
         "FROM item " +
         "INNER JOIN type ON type.id = item.type_id " +
         "INNER JOIN topic ON topic.id = item.topic_id " +
-        "INNER JOIN user_data ON user_data.id = item.id AND user_data.liked = 1 AND user_data.user_id = ?  ORDER BY item.id";
-    const [rows] = await pool.query<RowDataPacket[]>(sql, [id]);
+        "INNER JOIN user_data ON user_data.id = item.id " +
+            "AND user_data.liked = 1 " +
+            "AND user_data.user_id = ? " +
+        "WHERE item.id > ? " +
+        "AND item.topic_id IN (?) " +
+        "ORDER BY item.id " +
+        "LIMIT ? ";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, startId,  topics, limit]);
     return rows;
 }
 
-export async function getWatchedItems(id: number): Promise<RowDataPacket[]> {
+export async function getWatchedItems(userId: number, limit:number, startId: number, topics: string[]|number[]): Promise<RowDataPacket[]> {
+    if(!topics || !topics.length){
+        topics = environment.defaultTopics;
+    }
     const sql = "SELECT item.id, " +
     "item.likes, " +
     "item.explanation_id, " +
@@ -247,12 +268,18 @@ export async function getWatchedItems(id: number): Promise<RowDataPacket[]> {
     "INNER JOIN topic ON topic.id = item.topic_id " +
     "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
     "WHERE user_data.watched=1 " +
-    "ORDER BY d_id desc;";
-    const [rows] = await pool.query<RowDataPacket[]>(sql, [id]);
+    "AND item.id > ? " +
+    "AND item.topic_id IN (?) " +
+    "ORDER BY d_id desc " +
+    "LIMIT ? ";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, startId,  topics, limit]);
     return rows;
 }
 
-export async function getWatchListItems(id: number): Promise<RowDataPacket[]> {
+export async function getWatchListItems(id: number, limit:number, startId: number, topics: string[]|number[]): Promise<RowDataPacket[]> {
+    if(!topics || !topics.length){
+        topics = environment.defaultTopics;
+    }
     const sql = "SELECT   item.id, " +
         "item.likes, " +
         "item.explanation_id, " +
@@ -280,12 +307,18 @@ export async function getWatchListItems(id: number): Promise<RowDataPacket[]> {
         "INNER JOIN type ON type.id = item.type_id " +
         "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
         "WHERE user_data.watchlist=1 " +
-        "ORDER BY item.id";
-    const [rows] = await pool.query<RowDataPacket[]>(sql, [id]);
+        "AND item.id > ? " +
+        "AND item.topic_id IN (?) " +
+        "ORDER BY item.id " +
+        "LIMIT ? ";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [id, startId,  topics, limit]);
     return rows;
 }
 
-export async function getReviewedItemsByUser(userId: number): Promise<RowDataPacket[]> {
+export async function getReviewedItemsByUser(userId: number, limit:number, startId: number, topics: string[]|number[]): Promise<RowDataPacket[]> {
+    if(!topics || !topics.length){
+        topics = environment.defaultTopics;
+    }
     const sql = "SELECT  item.id, " +
         "item.likes, " +
         "item.explanation_id, " +
@@ -312,12 +345,19 @@ export async function getReviewedItemsByUser(userId: number): Promise<RowDataPac
         "INNER JOIN type ON type.id = item.type_id " +
         "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
         "WHERE item.reviewed=1 " +
-        "AND item.reviewed_by_id = ?  ORDER BY item.id";
-    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, userId]);
+        "AND item.reviewed_by_id = ? " +
+        "AND item.id > ? " +
+        "AND item.topic_id IN (?) " +
+        "ORDER BY item.id " +
+        "LIMIT ? ";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, userId, startId,  topics, limit]);
     return rows;
 }
 
-export async function getItemsToReview(userId: number): Promise<RowDataPacket[]> {
+export async function getItemsToReview(userId: number, limit:number, startId: number, topics: string[]|number[]): Promise<RowDataPacket[]> {
+    if(!topics || !topics.length){
+        topics = environment.defaultTopics;
+    }
     const sql = "SELECT  item.id, " +
         "item.likes, " +
         "item.explanation_id, " +
@@ -342,7 +382,11 @@ export async function getItemsToReview(userId: number): Promise<RowDataPacket[]>
         "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
         "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
-        "WHERE item.reviewed = 0  ORDER BY item.id";
-    const [row] = await pool.query<RowDataPacket[]>(sql, [userId]);
+        "WHERE item.reviewed = 0 " +
+        "AND item.id > ? " +
+        "AND item.topic_id IN (?) " +
+        "ORDER BY item.id " +
+        "LIMIT ? ";
+    const [row] = await pool.query<RowDataPacket[]>(sql, [userId, startId,  topics, limit]);
     return row;
 }
