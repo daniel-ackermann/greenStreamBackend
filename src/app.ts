@@ -15,6 +15,7 @@ import FullRoutes from './routes/full.routes';
 import FullUserRoutes from './routes/fullUser.routes';
 import UserRoutes from './routes/user.routes';
 import FeedbackRoutes from './routes/feedback.routes';
+import FeedbacksRoutes from './routes/feedbacks.routes';
 import LanguageRoutes from './routes/language.routes';
 import * as https from 'https';
 import compression from 'compression';
@@ -61,6 +62,7 @@ export class App {
         this.app.use('/api/fullUser', FullUserRoutes);
         this.app.use("/api/user", UserRoutes);
         this.app.use("/api/feedback", FeedbackRoutes);
+        this.app.use("/api/feedbacks", FeedbacksRoutes);
         this.app.use("/api/languages", LanguageRoutes);
         this.app.all('/*', (req, res) => {
             res.sendFile('/index.html', { root: path.resolve(__dirname, '../html') });
