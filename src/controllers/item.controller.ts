@@ -58,7 +58,7 @@ export async function updateStatus(userId: number, data: UserData): Promise<numb
 }
 
 
-export async function getItemWithUserData(id: number, userId: number): Promise<RowDataPacket[]> {
+export async function getItemWithUserData(id: number, userId: number): Promise<RowDataPacket> {
     const sql = "SELECT     item.id, " +
         "item.likes, " +
         "item.explanation_id, " +
@@ -85,7 +85,7 @@ export async function getItemWithUserData(id: number, userId: number): Promise<R
         "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
         "WHERE item.id=?;";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, id]);
-    return rows;
+    return rows[0];
 }
 
 
@@ -95,7 +95,7 @@ export async function deleteItem(id: number): Promise<ResultSetHeader> {
 }
 
 export async function updateItem(id: number, updateItem: Item): Promise<ResultSetHeader> {
-    const [result] = await pool.query<ResultSetHeader>('UPDATE item set ? WHERE id = ?', [updateItem, id]);
+    const [result] = await pool.query<ResultSetHeader>('UPDATE item set explanation_id = ?, type_id = ?, url = ?, description = ?, title = ?, topic_id = ?, simple = ? WHERE id = ?', [updateItem.explanation_id, updateItem.type_id, updateItem.url, updateItem.description, updateItem.title, updateItem.topic_id, updateItem.simple, id]);
     return result;
 }
 

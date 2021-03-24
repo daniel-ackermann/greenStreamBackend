@@ -110,7 +110,7 @@ export async function getItemsWithUserData(userId: number, id:number, limit: num
     return rows;
 }
 
-export async function getSuggestedItems(userId: number, id:number, limit: number, lang?:string): Promise<RowDataPacket[]> {
+export async function getSuggestedItems(userId: number, startId:number, limit: number, lang?:string): Promise<RowDataPacket[]> {
     const languages = parseLanguage(lang);
     const sql = "SELECT  item.id, " +
         "item.likes, " +
@@ -140,11 +140,12 @@ export async function getSuggestedItems(userId: number, id:number, limit: number
         "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
         "WHERE item.language IN (?) " +
         "AND item.reviewed = 1 " +
+        "AND item.created_by_id != ? " +
         "AND item.id > ? " +
         "AND user_topics.user = ? " +
         "ORDER BY item.id " +
         "LIMIT ? ";
-    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, languages, id, userId, limit]);
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, languages, userId, startId, userId, limit]);
     return rows;
 }
 
