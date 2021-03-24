@@ -15,19 +15,19 @@ export async function removeFeedback(feedbackId: number): Promise<ResultSetHeade
 }
 
 export async function getFeedbacks(): Promise<RowDataPacket[]> {
-    const sql = `SELECT f.*, user.username, item.* FROM information_feedback f, user, item WHERE user.id = f.created_by_id AND item.id = f.information_id;`;
+    const sql = `SELECT f.id as feedback_id, f.feedback, user.username, item.* FROM information_feedback f, user, item WHERE user.id = f.created_by_id AND item.id = f.information_id;`;
     const [row] = await pool.query<RowDataPacket[]>(sql);
     return row;
 }
 
 export async function getFeedback(id:number): Promise<RowDataPacket[]> {
-    const sql = `f.*, user.username FROM information_feedback f, user WHERE user.id = f.created_by_id AND id=?;`;
+    const sql = `f.id as feedback_id, f.feedback, user.username FROM information_feedback f, user WHERE user.id = f.created_by_id AND id=?;`;
     const [row] = await pool.query<RowDataPacket[]>(sql, [id]);
     return row;
 }
 
 export async function getFeedbackByItem(id:number): Promise<RowDataPacket[]> {
-    const sql = `SELECT f.*, user.username FROM information_feedback f, user WHERE user.id = f.created_by_id AND information_id=?;`;
+    const sql = `SELECT f.id as feedback_id, f.feedback, user.username FROM information_feedback f, user WHERE user.id = f.created_by_id AND information_id=?;`;
     const [row] = await pool.query<RowDataPacket[]>(sql, [id]);
     return row;
 }
