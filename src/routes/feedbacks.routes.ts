@@ -6,19 +6,18 @@ import { authenticate } from '../middleware';
 
 const router = Router();
 
-router.route('/:limit/:startId')
-    .get(async (req: Request, res: Response) => {
-        return res.json(
-            await getFeedbacks()
-        )
-    })
-
 router.route('/item/:id')
-    .get(async (req: Request, res: Response) => {
+    .get(authenticate, async (req: Request, res: Response) => {
         return res.json(
             await getFeedbackByItem(parseInt(req.params.id))
         )
     })
 
+router.route('/:limit/:startId')
+    .get(authenticate, async (req: Request, res: Response) => {
+        return res.json(
+            await getFeedbacks()
+        )
+    })
 
 export default router;
