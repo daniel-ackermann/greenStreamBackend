@@ -15,12 +15,12 @@ router.route('')
     })
 
 router.route('/:id')
-    .get(async (req: Request, res: Response) => {
+    .get(authenticate, async (req: Request, res: Response) => {
         return res.json(
             await getFeedback(parseInt(req.params.id))
         )
     })
-    .delete(async (req: Request, res: Response) => {
+    .delete(authenticate, async (req: Request, res: Response) => {
         console.log("delete");
         await removeFeedback(parseInt(req.params.id));
         return res.json(200);
