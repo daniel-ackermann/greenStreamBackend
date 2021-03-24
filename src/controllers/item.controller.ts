@@ -12,6 +12,7 @@ export async function addItem(item: Item): Promise<Item> {
 export async function getItem(id: number): Promise<RowDataPacket> {
     const sql = "SELECT     item.id, " +
         "item.likes, " +
+        "item.marked, " +
         "item.explanation_id, " +
         "item.url, " +
         "item.url, " +
@@ -35,24 +36,36 @@ export async function getItem(id: number): Promise<RowDataPacket> {
 }
 
 export async function updateStatus(userId: number, data: UserData): Promise<number> {
-    let sql = "SELECT EXISTS (SELECT * FROM user_data  WHERE user_id = ? AND id = ?) as value;";
+    let sql = "SELECT * FROM user_data  WHERE user_id = ? AND id = ?;";
     const [result] = await pool.query<RowDataPacket[]>(sql, [userId, data.id]);
     data.user_id = userId;
     // does any entry exists in the database?
-    if (result[0].value) {
-        if (!data.watched && !data.liked && !data.watchlist) {
+    if (result.length > 0) {
+        if(data.watched != undefined){
+            result[0].watched = data.watched;
+        }
+        if(data.liked != undefined){
+            result[0].liked = data.liked;
+        }
+        if(data.watchlist != undefined){
+            result[0].watchlist = data.watchlist;
+        }
+        if(data.last_recommended != undefined){
+            result[0].last_recommended = data.last_recommended;
+        }
+        if (!result[0].watched && !result[0].liked && !result[0].watchlist && !result[0].last_recommended) {
             // delete if not longer needed => all are false
-            sql = "DELETE FROM user_data WHERE user_id = ? AND id = ?";
+            sql = "DELETE FROM user_data WHERE user_id = ? AND id = ?;";
             pool.query(sql, [userId, data.id]);
         } else {
             // update entry
-            sql = "UPDATE user_data SET ? WHERE user_id = ? AND id = ?";
-            pool.query(sql, [data, userId, data.id]);
+            sql = "UPDATE user_data SET watched=?, liked=?, watchlist=?, last_recommended=? WHERE user_id = ? AND id = ?;";
+            pool.query(sql, [result[0].watched, result[0].liked, result[0].watchlist, result[0].last_recommended, userId, data.id]);
         }
     } else {
         // create entry
-        sql = "INSERT INTO user_data SET ?";
-        pool.query(sql, [data]);
+        sql = "INSERT INTO user_data SET (watched, liked, watchlist, last_recommended) VALUES (?, ?, ?, ?)";
+        pool.query(sql, [data.watched, data.liked, data.watchlist, data.last_recommended]);
     }
     return 200;
 }
@@ -61,6 +74,7 @@ export async function updateStatus(userId: number, data: UserData): Promise<numb
 export async function getItemWithUserData(id: number, userId: number): Promise<RowDataPacket> {
     const sql = "SELECT     item.id, " +
         "item.likes, " +
+        "item.marked, " +
         "item.explanation_id, " +
         "item.url, " +
         "item.url, " +

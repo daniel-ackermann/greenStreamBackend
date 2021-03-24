@@ -10,6 +10,7 @@ export async function getAllItems(lang?: string): Promise<RowDataPacket[]> {
     const languages = parseLanguage(lang);
     const sql = "SELECT  item.id, " +
         "item.likes, " +
+        "item.marked, " +
         "item.explanation_id, " +
         "item.url, " +
         "item.url, " +
@@ -42,8 +43,8 @@ export async function getItems(id:number, limit: number, lang = "", topics: stri
     const languages = parseLanguage(lang);
     const sql = "SELECT  item.id, " +
         "item.likes, " +
+        "item.marked, " +
         "item.explanation_id, " +
-        "item.url, " +
         "item.url, " +
         "item.description, " +
         "item.title, " +
@@ -77,8 +78,8 @@ export async function getItemsWithUserData(userId: number, id:number, limit: num
     const languages = parseLanguage(lang);
     const sql = "SELECT  item.id, " +
         "item.likes, " +
+        "item.marked, " +
         "item.explanation_id, " +
-        "item.url, " +
         "item.url, " +
         "item.description, " +
         "item.title, " +
@@ -114,8 +115,8 @@ export async function getSuggestedItems(userId: number, startId:number, limit: n
     const languages = parseLanguage(lang);
     const sql = "SELECT  item.id, " +
         "item.likes, " +
+        "item.marked, " +
         "item.explanation_id, " +
-        "item.url, " +
         "item.url, " +
         "item.description, " +
         "item.title, " +
@@ -155,6 +156,8 @@ export async function getItemsByUser(userId: number, limit:number, startId: numb
         topics = environment.defaultTopics;
     }
     const sql = "SELECT  item.id, " +
+        "item.likes, " +
+        "item.marked, " +
         "item.explanation_id, " +
         "item.url, " +
         "item.description, " +
@@ -207,6 +210,8 @@ export async function getLikedItems(userId: number, limit:number, startId: numbe
     }
     let queryData: (number|number[]|string[])[] = [userId, startId, limit];
     let sql = "SELECT  item.id, " +
+        "item.likes, " +
+        "item.marked, " +
         "item.explanation_id, " +
         "item.url, " +
         "item.description, " +
@@ -249,6 +254,7 @@ export async function getWatchedItems(userId: number, limit:number, startId: num
     let queryData: (number|number[]|string[])[] = [userId, startId, limit];
     let sql = "SELECT item.id, " +
     "item.likes, " +
+    "item.marked, " +
     "item.explanation_id, " +
     "item.url, " +
     "item.url, " +
@@ -292,6 +298,7 @@ export async function getWatchListItems(userId: number, limit:number, startId: n
     let queryData: (number|number[]|string[])[] = [userId, startId, limit];
     let sql = "SELECT   item.id, " +
         "item.likes, " +
+        "item.marked, " +
         "item.explanation_id, " +
         "item.url, " +
         "item.url, " +
@@ -335,6 +342,7 @@ export async function getReviewedItemsByUser(userId: number, limit:number, start
     let queryData: (number|number[]|string[])[] = [userId, userId, startId, limit];
     let sql = "SELECT  item.id, " +
         "item.likes, " +
+        "item.marked, " +
         "item.explanation_id, " +
         "item.url, " +
         "item.url, " +
@@ -378,6 +386,7 @@ export async function getItemsToReview(userId: number, limit:number, startId: nu
     let queryData: (number|number[]|string[])[] = [userId, startId, limit];
     let sql = "SELECT  item.id, " +
         "item.likes, " +
+        "item.marked, " +
         "item.explanation_id, " +
         "item.url, " +
         "item.url, " +

@@ -8,7 +8,7 @@ BEGIN
         UPDATE item SET item.likes = item.likes+1 WHERE NEW.id = item.id;
     END IF;
     IF NEW.watchlist = '1' THEN
-        UPDATE item SET item.watchlist = item.watchlist+1 WHERE NEW.id = item.id;
+        UPDATE item SET item.marked = item.marked+1 WHERE NEW.id = item.id;
     END IF;
     IF NEW.watched = '1' THEN
         UPDATE item SET item.watched = item.watched+1 WHERE NEW.id = item.id;
@@ -25,7 +25,7 @@ BEGIN
         UPDATE item SET item.likes = item.likes-1 WHERE OLD.id = item.id;
     END IF;
     IF OLD.watchlist = '1' THEN
-        UPDATE item SET item.watchlist = item.watchlist-1 WHERE OLD.id = item.id;
+        UPDATE item SET item.marked = item.marked-1 WHERE OLD.id = item.id;
     END IF;
     IF OLD.watched = '1' THEN
         UPDATE item SET item.watched = item.watched-1 WHERE OLD.id = item.id;
@@ -54,9 +54,9 @@ BEGIN
     END IF;
     IF NEW.watchlist != OLD.watchlist THEN
         IF NEW.watchlist = '1' THEN
-            UPDATE item SET item.watchlist = item.watchlist+1 WHERE OLD.id = item.id;
+            UPDATE item SET item.marked = item.marked+1 WHERE OLD.id = item.id;
         ELSE
-            UPDATE item SET item.watchlist = item.watchlist-1 WHERE OLD.id = item.id;
+            UPDATE item SET item.marked = item.marked-1 WHERE OLD.id = item.id;
         END IF;
     END IF;
 END;
