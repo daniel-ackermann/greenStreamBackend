@@ -3,8 +3,8 @@ import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { Feedback } from '../interface/feedback';
 
 export async function addFeedback(feedback: Feedback): Promise<ResultSetHeader> {
-    const sql = `INSERT INTO information_feedback SET ?`;
-    const [rows] = await pool.query<ResultSetHeader>(sql, [feedback]);
+    const sql = `INSERT INTO information_feedback SET information_id = ?, feedback = ?, created_by_id = ?`;
+    const [rows] = await pool.query<ResultSetHeader>(sql, [feedback.information_id, feedback.feedback, feedback.created_by_id]);
     return rows;
 }
 
@@ -15,7 +15,7 @@ export async function removeFeedback(feedbackId: number): Promise<ResultSetHeade
 }
 
 export async function getFeedbacks(): Promise<RowDataPacket[]> {
-    const sql = `SELECT f.*, user.username FROM information_feedback f, user WHERE user.id = f.created_by_id;`;
+    const sql = `SELECT f.*, user.username, item.* FROM information_feedback f, user, item WHERE user.id = f.created_by_id AND item.id = f.information_id;`;
     const [row] = await pool.query<RowDataPacket[]>(sql);
     return row;
 }
