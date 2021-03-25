@@ -1,13 +1,13 @@
 import { Router } from 'express'
 import { Request, Response } from '../interface/custom.request'
-import { getItems, getReviewedItemsByUser, getItemsByUser, getItemsToReview, getLikedItems, getWatchListItems, getWatchedItems, getItemsWithUserData, getSuggestedItems } from '../controllers/items.controller'
+import { getItems, getReviewedItemsByUser, getItemsByUser, getItemsToReview, getLikedItems, getWatchListItems, getWatchedItems, getItemsWithUserData, getSuggestedItems, getItemsWithFeedback } from '../controllers/items.controller'
 import { authenticate, hasValidToken } from '../middleware';
 
 const router = Router();
 
 router.route('/reviewed/:limit/:startId?')
     .get(authenticate, async (req: Request, res: Response) => {
-        if(typeof req.query.topics === "string" && req.query.topics.length > 0){
+        if (typeof req.query.topics === "string" && req.query.topics.length > 0) {
             req.query.topics = req.query.topics.split(",");
         }
         return res.json(
@@ -17,7 +17,7 @@ router.route('/reviewed/:limit/:startId?')
 
 router.route('/review/:limit/:startId?')
     .get(authenticate, async (req: Request, res: Response) => {
-        if(typeof req.query.topics === "string" && req.query.topics.length > 0){
+        if (typeof req.query.topics === "string" && req.query.topics.length > 0) {
             req.query.topics = req.query.topics.split(",");
         }
         res.json(
@@ -27,7 +27,7 @@ router.route('/review/:limit/:startId?')
 
 router.route('/created/:limit/:startId?')
     .get(authenticate, async (req: Request, res: Response) => {
-        if(typeof req.query.topics === "string" && req.query.topics.length > 0){
+        if (typeof req.query.topics === "string" && req.query.topics.length > 0) {
             req.query.topics = req.query.topics.split(",");
         }
         return res.json(
@@ -37,7 +37,7 @@ router.route('/created/:limit/:startId?')
 
 router.route('/liked/:limit/:startId?')
     .get(authenticate, async (req: Request, res: Response) => {
-        if(typeof req.query.topics === "string" && req.query.topics.length > 0){
+        if (typeof req.query.topics === "string" && req.query.topics.length > 0) {
             req.query.topics = req.query.topics.split(",");
         }
         return res.json(
@@ -47,7 +47,7 @@ router.route('/liked/:limit/:startId?')
 
 router.route('/watched/:limit/:startId?')
     .get(authenticate, async (req: Request, res: Response) => {
-        if(typeof req.query.topics === "string" && req.query.topics.length > 0){
+        if (typeof req.query.topics === "string" && req.query.topics.length > 0) {
             req.query.topics = req.query.topics.split(",");
         }
         return res.json(
@@ -57,7 +57,7 @@ router.route('/watched/:limit/:startId?')
 
 router.route('/watchlist/:limit/:startId?')
     .get(authenticate, async (req: Request, res: Response) => {
-        if(typeof req.query.topics === "string" && req.query.topics.length > 0){
+        if (typeof req.query.topics === "string" && req.query.topics.length > 0) {
             req.query.topics = req.query.topics.split(",");
         }
         return res.json(
@@ -65,10 +65,24 @@ router.route('/watchlist/:limit/:startId?')
         )
     })
 
+router.route('/feedbacks/:limit/:startId?')
+    .get(async (req: Request, res: Response) => {
+        req.token = hasValidToken(req.cookies.jwt);
+        if (req.cookies.jwt && req.token != false) {
+            return res.json(
+                await getItemsWithFeedback(parseInt(req.params.limit), parseInt(req.params.startId), req.query.topics as string[], parseInt(req.token.id))
+            );
+        } else {
+            return res.json(
+                await getItemsWithFeedback(parseInt(req.params.limit), parseInt(req.params.startId), req.query.topics as string[])
+            );
+        }
+    });
+
 router.route('/:limit/:startId?')
     .get(async (req: Request, res: Response) => {
         req.token = hasValidToken(req.cookies.jwt);
-        if(typeof req.query.topics === "string" && req.query.topics.length > 0){
+        if (typeof req.query.topics === "string" && req.query.topics.length > 0) {
             req.query.topics = req.query.topics.split(",");
         }
         if (req.cookies.jwt && req.token != false) {

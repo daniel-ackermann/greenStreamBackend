@@ -389,7 +389,6 @@ export async function getItemsToReview(userId: number, limit:number, startId: nu
         "item.marked, " +
         "item.explanation_id, " +
         "item.url, " +
-        "item.url, " +
         "item.description, " +
         "item.title, " +
         "item.language, " +
@@ -417,6 +416,56 @@ export async function getItemsToReview(userId: number, limit:number, startId: nu
         }
         sql += "ORDER BY item.id " +
         "LIMIT ? ";
+    const [row] = await pool.query<RowDataPacket[]>(sql, queryData);
+    return row;
+}
+
+export async function getItemsWithFeedback(limit:number, startId: number, topics: string[]|number[], userId?: number): Promise<RowDataPacket[]>{
+    if(!topics || !topics.length){
+        topics = [];
+    }
+    const queryData: (number|number[]|string[])[] = [startId];
+    let sql =   "SELECT  item.id, " +
+                "item.likes, " +
+                "item.marked, " +
+                "item.explanation_id, " +
+                "item.url, " +
+                "item.description, " +
+                "item.title, " +
+                "item.language, " +
+                "item.simple, " +
+                "item.reviewed, " +
+                "item.topic_id, " +
+                "item.type_id, " +
+                "topic.name as topic_name, " +
+                "type.name as type_name, " +
+                "type.icon, " +
+                "type.view_external, ";
+if(userId){
+    sql +=      "user_data.liked, " +
+                "user_data.watched, " +
+                "user_data.watchlist, ";
+}
+sql +=          "count(item.id) as feedback, " +
+                "UNIX_TIMESTAMP(user_data.last_recommended) * 1000 as last_recommended " +
+                "FROM item " +
+                "INNER JOIN topic ON topic.id = item.topic_id " +
+                "INNER JOIN type ON type.id = item.type_id " +
+                "INNER JOIN information_feedback ON information_feedback.information_id = item.id ";
+if(userId){
+    sql +=      "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? ";
+    queryData.unshift(userId);
+}
+sql +=          "WHERE item.reviewed = 1 " +
+                "AND item.id > ? ";
+if(topics.length != 0){
+sql +=          "AND item.topic_id IN (?) ";
+    queryData.push(topics);
+}
+sql +=          "GROUP BY item.id, user_data.liked, user_data.watched, user_data.watchlist, user_data.last_recommended " +
+                "ORDER BY item.id " +
+                "LIMIT ? ";
+    queryData.push(limit);
     const [row] = await pool.query<RowDataPacket[]>(sql, queryData);
     return row;
 }
