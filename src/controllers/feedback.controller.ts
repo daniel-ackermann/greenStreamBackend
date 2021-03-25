@@ -27,7 +27,7 @@ export async function getFeedback(id:number): Promise<RowDataPacket[]> {
 }
 
 export async function getFeedbackByItem(id:number): Promise<RowDataPacket[]> {
-    const sql = `SELECT f.id as feedback_id, f.feedback, user.username FROM information_feedback f, user WHERE user.id = f.created_by_id AND information_id=?;`;
+    const sql = `SELECT f.id as feedback_id, f.feedback, user.username, label.name, label.color FROM information_feedback f, user, label WHERE user.id = f.created_by_id AND label.id = f.label AND f.feedback != '' AND information_id=?;`;
     const [row] = await pool.query<RowDataPacket[]>(sql, [id]);
     return row;
 }

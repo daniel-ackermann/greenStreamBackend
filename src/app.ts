@@ -8,6 +8,7 @@ import path from 'path';
 import ImportRoutes from './routes/import.routes';
 import IndexRoutes from './routes/index.routes'
 import ItemRoutes from './routes/item.routes';
+import LabelsRoutes from './routes/labels.routes';
 import ItemsRoutes from './routes/items.routes';
 import TopicRoutes from './routes/topic.routes';
 import TypeRoutes from './routes/type.routes';
@@ -55,6 +56,7 @@ export class App {
         this.app.use('/', IndexRoutes);
         this.app.use('/api/items', ItemsRoutes);
         this.app.use('/api/item', ItemRoutes);
+        this.app.use('/api/labels', LabelsRoutes);
         this.app.use('/api/topics', TopicRoutes);
         this.app.use('/api/types', TypeRoutes);
         this.app.use('/api/full', FullRoutes);
