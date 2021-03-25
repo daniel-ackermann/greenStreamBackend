@@ -65,7 +65,7 @@ export async function updateStatus(userId: number, data: UserData): Promise<numb
     } else {
         // create entry
         sql = "INSERT INTO user_data (user_id, id, watched, liked, watchlist, last_recommended) VALUES (?, ?, ?, ?, ?, ?)";
-        pool.query(sql, [data.user_id, data.id, data.watched, data.liked, data.watchlist, data.last_recommended]);
+        pool.query(sql, [data.user_id, data.id, data.watched || 0, data.liked || 0, data.watchlist || 0, data.last_recommended || new Date().getTime() ]);
     }
     return 200;
 }
