@@ -6,3 +6,9 @@ export async function getLabelsOfItem(itemId: number):Promise<RowDataPacket[]> {
     const [row] = await db.query<RowDataPacket[]>(sql, [itemId]);
     return row;
 }
+
+export async function getLabels():Promise<RowDataPacket[]>{
+    const sql = "SELECT label.language, label.name, label.color, label.id FROM label ";
+    const [row] = await db.query<RowDataPacket[]>(sql);
+    return row;
+}
