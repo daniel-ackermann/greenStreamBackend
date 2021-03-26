@@ -10,5 +10,7 @@ export interface Item {
     title: string,
     topic_id: number,
     language: [string],
-    simple: number
+    simple: number,
+    reviewed?: number,
+    public?: number
 }

@@ -21,6 +21,7 @@ export async function getItem(id: number): Promise<RowDataPacket> {
         "item.language, " +
         "item.simple, " +
         "item.reviewed, " +
+        "item.public, " +
         "item.type_id, " +
         "item.topic_id, " +
         "topic.name as topic_name, " +
@@ -83,6 +84,7 @@ export async function getItemWithUserData(id: number, userId: number): Promise<R
         "item.language, " +
         "item.simple, " +
         "item.reviewed, " +
+        "item.public, " +
         "item.type_id, " +
         "item.topic_id, " +
         "topic.name as topic_name, " +
@@ -109,7 +111,7 @@ export async function deleteItem(id: number): Promise<ResultSetHeader> {
 }
 
 export async function updateItem(id: number, updateItem: Item): Promise<ResultSetHeader> {
-    const [result] = await pool.query<ResultSetHeader>('UPDATE item set explanation_id = ?, type_id = ?, url = ?, description = ?, title = ?, topic_id = ?, simple = ? WHERE id = ?', [updateItem.explanation_id, updateItem.type_id, updateItem.url, updateItem.description, updateItem.title, updateItem.topic_id, updateItem.simple, id]);
+    const [result] = await pool.query<ResultSetHeader>('UPDATE item set explanation_id = ?, type_id = ?, url = ?, description = ?, title = ?, topic_id = ?, simple = ?, public=? WHERE id = ?', [updateItem.explanation_id, updateItem.type_id, updateItem.url, updateItem.description, updateItem.title, updateItem.topic_id, updateItem.simple, updateItem.public, id]);
     return result;
 }
 
