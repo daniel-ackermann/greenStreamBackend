@@ -21,13 +21,25 @@ export async function getFeedbacks(): Promise<RowDataPacket[]> {
 }
 
 export async function getFeedback(id:number): Promise<RowDataPacket[]> {
-    const sql = `f.id as feedback_id, f.feedback, user.username FROM information_feedback f, user WHERE user.id = f.created_by_id AND id=?;`;
+    const sql = `SELECT f.id as feedback_id, f.feedback, user.username FROM information_feedback f, user WHERE user.id = f.created_by_id AND id=?;`;
     const [row] = await pool.query<RowDataPacket[]>(sql, [id]);
     return row;
 }
 
 export async function getFeedbackByItem(id:number): Promise<RowDataPacket[]> {
-    const sql = `SELECT f.id as feedback_id, f.feedback, f.created, user.username, label.name, label.color FROM information_feedback f, user, label WHERE user.id = f.created_by_id AND label.id = f.label AND f.feedback != '' AND information_id=?;`;
+    const sql = `SELECT f.id as feedback_id, f.feedback, f.created, user.username, label.name, label.color, label.id as label, f.done FROM information_feedback f, user, label WHERE user.id = f.created_by_id AND label.id = f.label AND f.feedback != '' AND information_id=?;`;
     const [row] = await pool.query<RowDataPacket[]>(sql, [id]);
     return row;
+}
+
+export async function toggleStatus(id: number, value: boolean):Promise<ResultSetHeader>{
+    const sql = "UPDATE information_feedback SET done = ? where id = ? ";
+    const [row] = await pool.query<ResultSetHeader>(sql, [value, id]);
+    return row;
+}
+
+export async function setDoneByLabel(item: number, label: number):Promise<number>{
+    const sql = "UPDATE information_feedback SET done = true WHERE label = ? AND information_id = ? AND done = false AND feedback = '' ";
+    const [row] = await pool.query<ResultSetHeader>(sql, [label, item]);
+    return row.affectedRows;
 }

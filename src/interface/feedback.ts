@@ -5,4 +5,5 @@ export interface Feedback {
     feedback:string;
     created_by_id?:number;
     label?: number;
+    done: boolean;
 }

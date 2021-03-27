@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { Request, Response } from '../interface/custom.request'
-import { addFeedback, getFeedback, removeFeedback } from '../controllers/feedback.controller';
+import { addFeedback, getFeedback, removeFeedback, toggleStatus } from '../controllers/feedback.controller';
 import { authenticate } from '../middleware';
 
 
@@ -13,6 +13,13 @@ router.route('')
             await addFeedback(req.body)
         );
     })
+
+router.route('/status')
+    .post(authenticate, async (req: Request, res: Response) => {
+        return res.json(
+            await toggleStatus(parseInt(req.body.id), req.body.status as boolean)
+        );
+    });
 
 router.route('/:id')
     .get(authenticate, async (req: Request, res: Response) => {
