@@ -475,3 +475,85 @@ sql +=          "ORDER BY item.id " +
     const [row] = await pool.query<RowDataPacket[]>(sql, queryData);
     return row;
 }
+
+export async function getSearchResult(query: string, limit: number, startId: number, topics: string[]|number[], lang?: string): Promise<RowDataPacket[]> {
+    if(!topics || !topics.length){
+        topics = environment.defaultTopics;
+    }
+    const languages = parseLanguage(lang);
+    const sql = "SELECT  item.id, " +
+        "item.likes, " +
+        "item.marked, " +
+        "item.explanation_id, " +
+        "item.url, " +
+        "item.description, " +
+        "item.title, " +
+        "item.language, " +
+        "item.simple, " +
+        "item.reviewed, " +
+        "item.created_by_id, " +
+        "item.topic_id, " +
+        "item.type_id, " +
+        "topic.name as topic_name, " +
+        "type.name as type_name, " +
+        "type.icon, " +
+        "type.view_external " +
+        "FROM item " +
+        "INNER JOIN topic ON topic.id = item.topic_id " +
+        "INNER JOIN type ON type.id = item.type_id " +
+        "WHERE item.language IN (?) " +
+        "AND item.topic_id IN (?) " +
+        // "AND MATCH(item.title) AGAINST (?) " +
+        // "AND MATCH(item.description) AGAINST (?) " +
+        "AND ( item.title LIKE ? OR item.description LIKE ? ) " +
+        "AND item.reviewed = 1 " +
+        "AND item.public = 1 " +
+        "AND item.id > ? " +
+        "ORDER BY item.id " +
+        "LIMIT ? ";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [languages, topics, "%" + query + "%", "%" + query + "%", startId, limit]);
+    return rows;
+}
+export async function getSearchResultUser(query: string, limit: number, startId: number, topics: string[]|number[], userId: number, lang?: string): Promise<RowDataPacket[]> {
+    if(!topics || !topics.length){
+        topics = environment.defaultTopics;
+    }
+    const languages = parseLanguage(lang);
+    const sql = "SELECT  item.id, " +
+        "item.likes, " +
+        "item.marked, " +
+        "item.explanation_id, " +
+        "item.url, " +
+        "item.description, " +
+        "item.title, " +
+        "item.language, " +
+        "item.simple, " +
+        "item.reviewed, " +
+        "item.created_by_id, " +
+        "item.topic_id, " +
+        "item.type_id, " +
+        "topic.name as topic_name, " +
+        "type.name as type_name, " +
+        "type.icon, " +
+        "user_data.liked, " +
+        "user_data.watched, " +
+        "user_data.watchlist, " +
+        "UNIX_TIMESTAMP(user_data.last_recommended) * 1000 as last_recommended, " +
+        "type.view_external " +
+        "FROM item " +
+        "INNER JOIN topic ON topic.id = item.topic_id " +
+        "INNER JOIN type ON type.id = item.type_id " +
+        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
+        "WHERE item.language IN (?) " +
+        "AND item.topic_id IN (?) " +
+        // "AND MATCH(item.title) AGAINST (?) " +
+        // "AND MATCH(item.description) AGAINST (?) " +
+        "AND ( item.title LIKE ? OR item.description LIKE ? ) " +
+        "AND item.reviewed = 1 " +
+        "AND item.public = 1 " +
+        "AND item.id > ? " +
+        "ORDER BY item.id " +
+        "LIMIT ? ";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, languages, topics, "%" + query + "%", "%" + query + "%", startId, limit]);
+    return rows;
+}

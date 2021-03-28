@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { Request, Response } from '../interface/custom.request'
-import { getItems, getReviewedItemsByUser, getItemsByUser, getItemsToReview, getLikedItems, getWatchListItems, getWatchedItems, getItemsWithUserData, getSuggestedItems, getItemsWithFeedback } from '../controllers/items.controller'
+import { getItems, getReviewedItemsByUser, getItemsByUser, getItemsToReview, getLikedItems, getWatchListItems, getWatchedItems, getItemsWithUserData, getSuggestedItems, getItemsWithFeedback, getSearchResult, getSearchResultUser } from '../controllers/items.controller'
 import { authenticate, hasValidToken } from '../middleware';
 
 const router = Router();
@@ -66,7 +66,7 @@ router.route('/watchlist/:limit/:startId?')
     })
 
 router.route('/feedbacks/:limit/:startId?')
-    .get(async (req: Request, res: Response) => {
+    .get(authenticate, async (req: Request, res: Response) => {
         req.token = hasValidToken(req.cookies.jwt);
         if (req.cookies.jwt && req.token != false) {
             return res.json(
@@ -77,6 +77,26 @@ router.route('/feedbacks/:limit/:startId?')
                 await getItemsWithFeedback(parseInt(req.params.limit), parseInt(req.params.startId), req.query.topics as string[])
             );
         }
+    });
+
+router.route('/search/:limit/:startId/:query?')
+    .get(async (req: Request, res: Response) => {
+        req.token = hasValidToken(req.cookies.jwt);
+        let result;
+        if (req.cookies.jwt && req.token != false) {
+            if(req.params.query === undefined){
+                result = await getSuggestedItems(parseInt(req.token.id, 10), parseInt(req.params.startId) || 0, parseInt(req.params.limit), req.headers["accept-language"]);
+            }else{
+                result = await getSearchResultUser(req.params.query, parseInt(req.params.limit), parseInt(req.params.startId), req.query.topics as string[],  parseInt(req.token.id), req.headers["accept-language"])
+            }
+        } else {
+            if(req.params.query === undefined){
+                result = await getItems(parseInt(req.params.startId) || 0, parseInt(req.params.limit), req.headers["accept-language"], req.query.topics as string[]);
+            }else{
+                result = await getSearchResult(req.params.query, parseInt(req.params.limit), parseInt(req.params.startId), req.query.topics as string[], req.headers["accept-language"])
+            }
+        }
+        return res.json(result);
     });
 
 router.route('/:limit/:startId?')
