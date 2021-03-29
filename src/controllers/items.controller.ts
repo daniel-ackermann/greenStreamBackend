@@ -32,7 +32,7 @@ export async function getAllItems(lang?: string): Promise<RowDataPacket[]> {
                         "JSON_OBJECT( " +
                             "'code', language.code, " +
                             "'name', language.name " +
-                        " ) as language, " +
+                        " ) as language " +
                         "FROM item " +
                         "INNER JOIN type ON type.id = item.type_id " +
                         "INNER JOIN topic ON topic.id = item.topic_id " +
@@ -74,7 +74,7 @@ export async function getItems(id:number, limit: number, lang = "", topics: stri
                         "JSON_OBJECT( " +
                             "'code', language.code, " +
                             "'name', language.name " +
-                        " ) as language, " +
+                        " ) as language " +
                         "FROM item " +
                         "INNER JOIN type ON type.id = item.type_id " +
                         "INNER JOIN topic ON topic.id = item.topic_id " +
