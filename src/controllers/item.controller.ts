@@ -15,22 +15,30 @@ export async function getItem(id: number): Promise<RowDataPacket> {
         "item.marked, " +
         "item.explanation_id, " +
         "item.url, " +
-        "item.url, " +
         "item.description, " +
         "item.title, " +
-        "item.language, " +
         "item.simple, " +
         "item.reviewed, " +
         "item.public, " +
-        "item.type_id, " +
-        "item.topic_id, " +
-        "topic.name as topic_name, " +
-        "type.name as type_name, " +
-        "type.icon, " +
-        "type.view_external " +
+        "JSON_OBJECT( "+
+            "'id', type.id, " +
+            "'name', type.name, " +
+            "'icon', type.icon, " +
+            "'view_external', type.view_external " +
+        " ) as type, " +
+        "JSON_OBJECT( " +
+            "'name', topic.name, " +
+            "'id', topic.id, " +
+            "'language', topic.language " +
+        " ) as topic, " +
+        "JSON_OBJECT( " +
+            "'code', language.code, " +
+            "'name', language.name " +
+        " ) as language " +
         "FROM item " +
-        "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
+        "INNER JOIN topic ON topic.id = item.topic_id " +
+        "INNER JOIN language ON language.code = item.language " +
         "WHERE item.id=?;";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [id]);
     return rows[0];
@@ -78,26 +86,34 @@ export async function getItemWithUserData(id: number, userId: number): Promise<R
         "item.marked, " +
         "item.explanation_id, " +
         "item.url, " +
-        "item.url, " +
         "item.description, " +
         "item.title, " +
-        "item.language, " +
         "item.simple, " +
         "item.reviewed, " +
         "item.public, " +
-        "item.type_id, " +
-        "item.topic_id, " +
-        "topic.name as topic_name, " +
-        "type.name as type_name, " +
-        "type.icon, " +
-        "type.view_external, " +
+        "JSON_OBJECT( "+
+            "'id', type.id, " +
+            "'name', type.name, " +
+            "'icon', type.icon, " +
+            "'view_external', type.view_external " +
+        " ) as type, " +
+        "JSON_OBJECT( " +
+            "'name', topic.name, " +
+            "'id', topic.id, " +
+            "'language', topic.language " +
+        " ) as topic, " +
+        "JSON_OBJECT( " +
+            "'code', language.code, " +
+            "'name', language.name " +
+        " ) as language, " +
         "user_data.liked, " +
         "user_data.watched, " +
         "user_data.watchlist, " +
-        "UNIX_TIMESTAMP(user_data.last_recommended) as last_recommended " +
+        "user_data.last_recommended " +
         "FROM item " +
-        "INNER JOIN topic ON topic.id = item.topic_id " +
         "INNER JOIN type ON type.id = item.type_id " +
+        "INNER JOIN topic ON topic.id = item.topic_id " +
+        "INNER JOIN language ON language.code = item.language " +
         "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
         "WHERE item.id=?;";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, id]);
@@ -111,7 +127,7 @@ export async function deleteItem(id: number): Promise<ResultSetHeader> {
 }
 
 export async function updateItem(id: number, updateItem: Item): Promise<ResultSetHeader> {
-    const [result] = await pool.query<ResultSetHeader>('UPDATE item set explanation_id = ?, type_id = ?, url = ?, description = ?, title = ?, topic_id = ?, simple = ?, public=? WHERE id = ?', [updateItem.explanation_id, updateItem.type_id, updateItem.url, updateItem.description, updateItem.title, updateItem.topic_id, updateItem.simple, updateItem.public, id]);
+    const [result] = await pool.query<ResultSetHeader>('UPDATE item set explanation_id = ?, type_id = ?, url = ?, description = ?, title = ?, topic_id = ?, simple = ?, public=? WHERE id = ?', [updateItem.explanation_id, updateItem.type.id, updateItem.url, updateItem.description, updateItem.title, updateItem.topic.id, updateItem.simple, updateItem.public, id]);
     return result;
 }
 

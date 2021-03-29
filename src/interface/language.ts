@@ -1,4 +1,4 @@
-export interface language {
-    name: string;
-    value: string;
+export class Language {
+    name = "";
+    value = "";
 }

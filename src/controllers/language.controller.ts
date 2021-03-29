@@ -1,6 +1,6 @@
-import { language } from "../interface/language";
+import { Language } from "../interface/language";
 
-export function getLanguages(): language[] {
+export function getLanguages(): Language[] {
     return [{
         name: "Deutsch",
         value: "de"

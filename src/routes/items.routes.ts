@@ -88,20 +88,24 @@ router.route('/search/:limit/:startId/:query?')
         let result;
         if (req.cookies.jwt && req.token != false) {
             console.log(req.params.query);
-            if(req.params.query === undefined ){
-                if (req.query.topics && req.query.topics.length && req.query.topics.length > 0) {
-                    console.log("auth\ttopics\t => getItemsWithUserData");
-                    return res.status(200).json(
-                        await getItemsWithUserData(parseInt(req.token.id, 10), parseInt(req.params.startId) || 0, parseInt(req.params.limit), req.query.topics as string[], req.headers["accept-language"])
-                    );
-                } else {
-                    console.log("auth\t\t => getSuggested");
-                    return res.status(200).json(
-                        await getSuggestedItems(parseInt(req.token.id, 10), parseInt(req.params.startId) || 0, parseInt(req.params.limit), req.headers["accept-language"])
-                    );
+            try{
+                if(req.params.query === undefined ){
+                    if (req.query.topics && req.query.topics.length && req.query.topics.length > 0) {
+                        console.log("auth\ttopics\t => getItemsWithUserData");
+                        return res.status(200).json(
+                            await getItemsWithUserData(parseInt(req.token.id, 10), parseInt(req.params.startId) || 0, parseInt(req.params.limit), req.query.topics as string[], req.headers["accept-language"])
+                        );
+                    } else {
+                        console.log("auth\t\t => getSuggested");
+                        return res.status(200).json(
+                            await getSuggestedItems(parseInt(req.token.id, 10), parseInt(req.params.startId) || 0, parseInt(req.params.limit), req.headers["accept-language"])
+                        );
+                    }
+                }else{
+                    result = await getSearchResultUser(req.params.query, parseInt(req.params.limit), parseInt(req.params.startId), req.query.topics as string[],  parseInt(req.token.id), req.headers["accept-language"])
                 }
-            }else{
-                result = await getSearchResultUser(req.params.query, parseInt(req.params.limit), parseInt(req.params.startId), req.query.topics as string[],  parseInt(req.token.id), req.headers["accept-language"])
+            }catch(e){
+                return res.status(200).json([]);
             }
         } else {
             if(req.params.query === undefined){

@@ -9,30 +9,38 @@ import { environment } from '../env/environment';
 export async function getAllItems(lang?: string): Promise<RowDataPacket[]> {
     const languages = parseLanguage(lang);
     const sql = "SELECT  item.id, " +
-        "item.likes, " +
-        "item.marked, " +
-        "item.explanation_id, " +
-        "item.url, " +
-        "item.url, " +
-        "item.description, " +
-        "item.title, " +
-        "item.language, " +
-        "item.simple, " +
-        "item.reviewed, " +
-        "item.created_by_id, " +
-        "item.topic_id, " +
-        "item.type_id, " +
-        "topic.name as topic_name, " +
-        "type.name as type_name, " +
-        "type.icon, " +
-        "type.view_external " +
-        "FROM item " +
-        "INNER JOIN topic ON topic.id = item.topic_id " +
-        "INNER JOIN type ON type.id = item.type_id " +
-        "WHERE item.language IN (?) " +
-        "AND item.reviewed = 1 "+
-        "AND item.public = 1 " +
-        "ORDER BY item.id ";
+                        "item.likes, " +
+                        "item.marked, " +
+                        "item.explanation_id, " +
+                        "item.url, " +
+                        "item.description, " +
+                        "item.title, " +
+                        "item.simple, " +
+                        "item.reviewed, " +
+                        "item.public, " +
+                        "JSON_OBJECT( "+
+                            "'id', type.id, " +
+                            "'name', type.name, " +
+                            "'icon', type.icon, " +
+                            "'view_external', type.view_external " +
+                        " ) as type, " +
+                        "JSON_OBJECT( " +
+                            "'name', topic.name, " +
+                            "'id', topic.id, " +
+                            "'language', topic.language " +
+                        " ) as topic, " +
+                        "JSON_OBJECT( " +
+                            "'code', language.code, " +
+                            "'name', language.name " +
+                        " ) as language, " +
+                        "FROM item " +
+                        "INNER JOIN type ON type.id = item.type_id " +
+                        "INNER JOIN topic ON topic.id = item.topic_id " +
+                        "INNER JOIN language ON language.code = item.language " +
+                        "WHERE item.language IN (?) " +
+                        "AND item.reviewed = 1 "+
+                        "AND item.public = 1 " +
+                        "ORDER BY item.id ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [languages]);
     return rows;
 }
@@ -43,32 +51,41 @@ export async function getItems(id:number, limit: number, lang = "", topics: stri
     }
     const languages = parseLanguage(lang);
     const sql = "SELECT  item.id, " +
-        "item.likes, " +
-        "item.marked, " +
-        "item.explanation_id, " +
-        "item.url, " +
-        "item.description, " +
-        "item.title, " +
-        "item.language, " +
-        "item.simple, " +
-        "item.reviewed, " +
-        "item.created_by_id, " +
-        "item.topic_id, " +
-        "item.type_id, " +
-        "topic.name as topic_name, " +
-        "type.name as type_name, " +
-        "type.icon, " +
-        "type.view_external " +
-        "FROM item " +
-        "INNER JOIN topic ON topic.id = item.topic_id " +
-        "INNER JOIN type ON type.id = item.type_id " +
-        "WHERE item.language IN (?) " +
-        "AND item.reviewed = 1 " +
-        "AND item.id > ? " +
-        "AND item.public = 1 " +
-        "AND item.topic_id IN (?) " +
-        "ORDER BY item.id " +
-        "LIMIT ? ";
+                        "item.likes, " +
+                        "item.marked, " +
+                        "item.explanation_id, " +
+                        "item.url, " +
+                        "item.description, " +
+                        "item.title, " +
+                        "item.simple, " +
+                        "item.reviewed, " +
+                        "item.public, " +
+                        "JSON_OBJECT( "+
+                            "'id', type.id, " +
+                            "'name', type.name, " +
+                            "'icon', type.icon, " +
+                            "'view_external', type.view_external " +
+                        " ) as type, " +
+                        "JSON_OBJECT( " +
+                            "'name', topic.name, " +
+                            "'id', topic.id, " +
+                            "'language', topic.language " +
+                        " ) as topic, " +
+                        "JSON_OBJECT( " +
+                            "'code', language.code, " +
+                            "'name', language.name " +
+                        " ) as language, " +
+                        "FROM item " +
+                        "INNER JOIN type ON type.id = item.type_id " +
+                        "INNER JOIN topic ON topic.id = item.topic_id " +
+                        "INNER JOIN language ON language.code = item.language " +
+                        "WHERE item.language IN (?) " +
+                        "AND item.reviewed = 1 " +
+                        "AND item.id > ? " +
+                        "AND item.public = 1 " +
+                        "AND item.topic_id IN (?) " +
+                        "ORDER BY item.id " +
+                        "LIMIT ? ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [languages, id, topics, limit]);
     return rows;
 }
@@ -79,37 +96,46 @@ export async function getItemsWithUserData(userId: number, id:number, limit: num
     }
     const languages = parseLanguage(lang);
     const sql = "SELECT  item.id, " +
-        "item.likes, " +
-        "item.marked, " +
-        "item.explanation_id, " +
-        "item.url, " +
-        "item.description, " +
-        "item.title, " +
-        "item.language, " +
-        "item.simple, " +
-        "item.reviewed, " +
-        "item.created_by_id, " +
-        "item.topic_id, " +
-        "item.type_id, " +
-        "topic.name as topic_name, " +
-        "type.name as type_name, " +
-        "type.icon, " +
-        "user_data.liked, " +
-        "user_data.watched, " +
-        "user_data.watchlist, " +
-        "UNIX_TIMESTAMP(user_data.last_recommended) * 1000 as last_recommended, " +
-        "type.view_external " +
-        "FROM item " +
-        "INNER JOIN topic ON topic.id = item.topic_id " +
-        "INNER JOIN type ON type.id = item.type_id " +
-        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
-        "WHERE item.language IN (?) " +
-        "AND item.topic_id IN (?) " +
-        "AND item.reviewed = 1 " +
-        "AND item.public = 1 " +
-        "AND item.id > ? " +
-        "ORDER BY item.id " +
-        "LIMIT ? ";
+                        "item.likes, " +
+                        "item.marked, " +
+                        "item.explanation_id, " +
+                        "item.url, " +
+                        "item.description, " +
+                        "item.title, " +
+                        "item.simple, " +
+                        "item.reviewed, " +
+                        "item.public, " +
+                        "JSON_OBJECT( "+
+                            "'id', type.id, " +
+                            "'name', type.name, " +
+                            "'icon', type.icon, " +
+                            "'view_external', type.view_external " +
+                        " ) as type, " +
+                        "JSON_OBJECT( " +
+                            "'name', topic.name, " +
+                            "'id', topic.id, " +
+                            "'language', topic.language " +
+                        " ) as topic, " +
+                        "JSON_OBJECT( " +
+                            "'code', language.code, " +
+                            "'name', language.name " +
+                        " ) as language, " +
+                        "user_data.liked, " +
+                        "user_data.watched, " +
+                        "user_data.watchlist, " +
+                        "user_data.last_recommended " +
+                        "FROM item " +
+                        "INNER JOIN type ON type.id = item.type_id " +
+                        "INNER JOIN topic ON topic.id = item.topic_id " +
+                        "INNER JOIN language ON language.code = item.language " +
+                        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
+                        "WHERE item.language IN (?) " +
+                        "AND item.topic_id IN (?) " +
+                        "AND item.reviewed = 1 " +
+                        "AND item.public = 1 " +
+                        "AND item.id > ? " +
+                        "ORDER BY item.id " +
+                        "LIMIT ? ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, languages, topics, id, limit]);
     return rows;
 }
@@ -117,39 +143,48 @@ export async function getItemsWithUserData(userId: number, id:number, limit: num
 export async function getSuggestedItems(userId: number, startId:number, limit: number, lang?:string): Promise<RowDataPacket[]> {
     const languages = parseLanguage(lang);
     const sql = "SELECT  item.id, " +
-        "item.likes, " +
-        "item.marked, " +
-        "item.explanation_id, " +
-        "item.url, " +
-        "item.description, " +
-        "item.title, " +
-        "item.language, " +
-        "item.simple, " +
-        "item.reviewed, " +
-        "item.created_by_id, " +
-        "item.topic_id, " +
-        "item.type_id, " +
-        "topic.name as topic_name, " +
-        "type.name as type_name, " +
-        "type.icon, " +
-        "user_data.liked, " +
-        "user_data.watched, " +
-        "user_data.watchlist, " +
-        "UNIX_TIMESTAMP(user_data.last_recommended) * 1000 as last_recommended, " +
-        "type.view_external " +
-        "FROM item " +
-        "INNER JOIN topic ON topic.id = item.topic_id " +
-        "INNER JOIN type ON type.id = item.type_id " +
-        "INNER JOIN user_topics ON user_topics.topic = item.topic_id " +
-        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
-        "WHERE item.language IN (?) " +
-        "AND item.reviewed = 1 " +
-        "AND item.created_by_id != ? " +
-        "AND item.id > ? " +
-        "AND item.public = 1 " +
-        "AND user_topics.user = ? " +
-        "ORDER BY item.id " +
-        "LIMIT ? ";
+                        "item.likes, " +
+                        "item.marked, " +
+                        "item.explanation_id, " +
+                        "item.url, " +
+                        "item.description, " +
+                        "item.title, " +
+                        "item.simple, " +
+                        "item.reviewed, " +
+                        "item.public, " +
+                        "JSON_OBJECT( "+
+                            "'id', type.id, " +
+                            "'name', type.name, " +
+                            "'icon', type.icon, " +
+                            "'view_external', type.view_external " +
+                        " ) as type, " +
+                        "JSON_OBJECT( " +
+                            "'name', topic.name, " +
+                            "'id', topic.id, " +
+                            "'language', topic.language " +
+                        " ) as topic, " +
+                        "JSON_OBJECT( " +
+                            "'code', language.code, " +
+                            "'name', language.name " +
+                        " ) as language, " +
+                        "user_data.liked, " +
+                        "user_data.watched, " +
+                        "user_data.watchlist, " +
+                        "user_data.last_recommended " +
+                        "FROM item " +
+                        "INNER JOIN type ON type.id = item.type_id " +
+                        "INNER JOIN topic ON topic.id = item.topic_id " +
+                        "INNER JOIN language ON language.code = item.language " +
+                        "INNER JOIN user_topics ON user_topics.topic = item.topic_id " +
+                        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
+                        "WHERE item.language IN (?) " +
+                        "AND item.reviewed = 1 " +
+                        "AND item.created_by_id != ? " +
+                        "AND item.id > ? " +
+                        "AND item.public = 1 " +
+                        "AND user_topics.user = ? " +
+                        "ORDER BY item.id " +
+                        "LIMIT ? ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, languages, userId, startId, userId, limit]);
     return rows;
 }
@@ -160,37 +195,46 @@ export async function getItemsByUser(userId: number, limit:number, startId: numb
         topics = environment.defaultTopics;
     }
     const sql = "SELECT  item.id, " +
-        "item.likes, " +
-        "item.marked, " +
-        "item.explanation_id, " +
-        "item.url, " +
-        "item.description, " +
-        "item.title, " +
-        "item.language, " +
-        "item.simple, " +
-        "item.reviewed, " +
-        "item.created_by_id, " +
-        "item.topic_id, " +
-        "item.type_id, " +
-        "topic.name as topic_name, " +
-        "type.name as type_name, " +
-        "type.icon, " +
-        "type.view_external, " +
-        "user_data.liked, " +
-        "user_data.watched, " +
-        "user_data.watchlist, " +
-        "UNIX_TIMESTAMP(user_data.last_recommended) * 1000 as last_recommended " +
-        "FROM item " +
-        "INNER JOIN type ON type.id = item.type_id " +
-        "INNER JOIN topic ON topic.id = item.topic_id " +
-        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
-        "WHERE item.created_by_id = ? " +
-        "AND item.topic_id = topic.id " +
-        "AND type.id = item.type_id " +
-        "AND item.id > ? " +
-        "AND item.topic_id IN (?) " +
-        "ORDER BY item.id " +
-        "LIMIT ? ";
+                        "item.likes, " +
+                        "item.marked, " +
+                        "item.explanation_id, " +
+                        "item.url, " +
+                        "item.description, " +
+                        "item.title, " +
+                        "item.simple, " +
+                        "item.reviewed, " +
+                        "item.public, " +
+                        "JSON_OBJECT( "+
+                            "'id', type.id, " +
+                            "'name', type.name, " +
+                            "'icon', type.icon, " +
+                            "'view_external', type.view_external " +
+                        " ) as type, " +
+                        "JSON_OBJECT( " +
+                            "'name', topic.name, " +
+                            "'id', topic.id, " +
+                            "'language', topic.language " +
+                        " ) as topic, " +
+                        "JSON_OBJECT( " +
+                            "'code', language.code, " +
+                            "'name', language.name " +
+                        " ) as language, " +
+                        "user_data.liked, " +
+                        "user_data.watched, " +
+                        "user_data.watchlist, " +
+                        "user_data.last_recommended " +
+                        "FROM item " +
+                        "INNER JOIN type ON type.id = item.type_id " +
+                        "INNER JOIN topic ON topic.id = item.topic_id " +
+                        "INNER JOIN language ON language.code = item.language " +
+                        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
+                        "WHERE item.created_by_id = ? " +
+                        "AND item.topic_id = topic.id " +
+                        "AND type.id = item.type_id " +
+                        "AND item.id > ? " +
+                        "AND item.topic_id IN (?) " +
+                        "ORDER BY item.id " +
+                        "LIMIT ? ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, userId, startId,  topics, limit]);
     return rows;
 }
@@ -213,40 +257,49 @@ export async function getLikedItems(userId: number, limit:number, startId: numbe
         topics = [];
     }
     let queryData: (number|number[]|string[])[] = [userId, startId, limit];
-    let sql = "SELECT  item.id, " +
-        "item.likes, " +
-        "item.marked, " +
-        "item.explanation_id, " +
-        "item.url, " +
-        "item.description, " +
-        "item.title, " +
-        "item.language, " +
-        "item.simple, " +
-        "item.reviewed, " +
-        "item.created_by_id, " +
-        "item.topic_id, " +
-        "item.type_id, " +
-        "topic.name as topic_name, " +
-        "type.name as type_name, " +
-        "type.icon, " +
-        "type.view_external, " +
-        "user_data.liked, " +
-        "user_data.watched, " +
-        "user_data.watchlist, " +
-        "UNIX_TIMESTAMP(user_data.last_recommended) * 1000 as last_recommended " +
-        "FROM item " +
-        "INNER JOIN type ON type.id = item.type_id " +
-        "INNER JOIN topic ON topic.id = item.topic_id " +
-        "INNER JOIN user_data ON user_data.id = item.id " +
-            "AND user_data.liked = 1 " +
-            "AND user_data.user_id = ? " +
-        "WHERE item.id > ? ";
-        if(topics.length != 0){
-            sql += "AND item.topic_id IN (?) ";
-            queryData = [userId, startId, topics, limit];
-        }
-        sql += "ORDER BY item.id " +
-        "LIMIT ? ";
+    let sql = "SELECT    item.id, " +
+                        "item.likes, " +
+                        "item.marked, " +
+                        "item.explanation_id, " +
+                        "item.url, " +
+                        "item.description, " +
+                        "item.title, " +
+                        "item.simple, " +
+                        "item.reviewed, " +
+                        "item.public, " +
+                        "JSON_OBJECT( "+
+                            "'id', type.id, " +
+                            "'name', type.name, " +
+                            "'icon', type.icon, " +
+                            "'view_external', type.view_external " +
+                        " ) as type, " +
+                        "JSON_OBJECT( " +
+                            "'name', topic.name, " +
+                            "'id', topic.id, " +
+                            "'language', topic.language " +
+                        " ) as topic, " +
+                        "JSON_OBJECT( " +
+                            "'code', language.code, " +
+                            "'name', language.name " +
+                        " ) as language, " +
+                        "user_data.liked, " +
+                        "user_data.watched, " +
+                        "user_data.watchlist, " +
+                        "user_data.last_recommended " +
+                        "FROM item " +
+                        "INNER JOIN type ON type.id = item.type_id " +
+                        "INNER JOIN topic ON topic.id = item.topic_id " +
+                        "INNER JOIN language ON language.code = item.language " +
+                        "INNER JOIN user_data ON user_data.id = item.id " +
+                        "AND user_data.liked = 1 " +
+                        "AND user_data.user_id = ? " +
+                        "WHERE item.id > ? ";
+    if(topics.length != 0){
+        sql +=          "AND item.topic_id IN (?) ";
+        queryData = [userId, startId, topics, limit];
+    }
+    sql +=              "ORDER BY item.id " +
+                        "LIMIT ? ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, queryData);
     return rows;
 }
@@ -256,41 +309,48 @@ export async function getWatchedItems(userId: number, limit:number, startId: num
         topics = [];
     }
     let queryData: (number|number[]|string[])[] = [userId, startId, limit];
-    let sql = "SELECT item.id, " +
-    "item.likes, " +
-    "item.marked, " +
-    "item.explanation_id, " +
-    "item.url, " +
-    "item.url, " +
-    "item.description, " +
-    "item.title, " +
-    "item.language, " +
-    "item.simple, " +
-    "item.reviewed, " +
-    "item.created_by_id, " +
-    "item.topic_id, " +
-    "item.type_id, " +
-    "topic.name as topic_name, " +
-    "type.name as type_name, " +
-    "type.icon, " +
-    "type.view_external, " +
-    "user_data.liked, " +
-    "user_data.watched, " +
-    "user_data.watchlist, " +
-    "user_data.id as d_id, " +
-    "user_data.last_recommended " +
-    "FROM item " +
-    "INNER JOIN type ON type.id = item.type_id " +
-    "INNER JOIN topic ON topic.id = item.topic_id " +
-    "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
-    "WHERE user_data.watched=1 " +
-    "AND item.id > ? ";
+    let sql = "SELECT    item.id, " +
+                        "item.likes, " +
+                        "item.marked, " +
+                        "item.explanation_id, " +
+                        "item.url, " +
+                        "item.description, " +
+                        "item.title, " +
+                        "item.simple, " +
+                        "item.reviewed, " +
+                        "item.public, " +
+                        "JSON_OBJECT( "+
+                            "'id', type.id, " +
+                            "'name', type.name, " +
+                            "'icon', type.icon, " +
+                            "'view_external', type.view_external " +
+                        " ) as type, " +
+                        "JSON_OBJECT( " +
+                            "'name', topic.name, " +
+                            "'id', topic.id, " +
+                            "'language', topic.language " +
+                        " ) as topic, " +
+                        "JSON_OBJECT( " +
+                            "'code', language.code, " +
+                            "'name', language.name " +
+                        " ) as language, " +
+                        "user_data.liked, " +
+                        "user_data.watched, " +
+                        "user_data.watchlist, " +
+                        "user_data.last_recommended " +
+                        "FROM item " +
+                        "INNER JOIN type ON type.id = item.type_id " +
+                        "INNER JOIN topic ON topic.id = item.topic_id " +
+                        "INNER JOIN language ON language.code = item.language " +
+                        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
+                        "WHERE user_data.watched=1 " +
+                        "AND item.id > ? ";
     if(topics.length != 0){
-        sql += "AND item.topic_id IN (?) ";
+        sql +=          "AND item.topic_id IN (?) ";
         queryData = [userId, startId, topics, limit];
     }
-    sql += "ORDER BY item.id " +
-    "LIMIT ? ";
+    sql +=              "ORDER BY item.id " +
+                        "LIMIT ? ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, queryData);
     return rows;
 }
@@ -300,41 +360,48 @@ export async function getWatchListItems(userId: number, limit:number, startId: n
         topics = [];
     }
     let queryData: (number|number[]|string[])[] = [userId, startId, limit];
-    let sql = "SELECT   item.id, " +
-        "item.likes, " +
-        "item.marked, " +
-        "item.explanation_id, " +
-        "item.url, " +
-        "item.url, " +
-        "item.description, " +
-        "item.title, " +
-        "item.language, " +
-        "item.simple, " +
-        "item.reviewed, " +
-        "item.created_by_id, " +
-        "item.topic_id, " +
-        "item.type_id, " +
-        "topic.name as topic_name, " +
-        "type.name as type_name, " +
-        "type.icon, " +
-        "type.view_external, " +
-        "user_data.liked, " +
-        "user_data.watched, " +
-        "user_data.watchlist, " +
-        "user_data.id as d_id, " +
-        "user_data.last_recommended " +
-        "FROM item " +
-        "INNER JOIN topic ON topic.id = item.topic_id " +
-        "INNER JOIN type ON type.id = item.type_id " +
-        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
-        "WHERE user_data.watchlist=1 " +
-        "AND item.id > ? ";
-        if(topics.length != 0){
-            sql += "AND item.topic_id IN (?) ";
-            queryData = [userId, startId, topics, limit];
-        }
-        sql += "ORDER BY item.id " +
-        "LIMIT ? ";
+    let sql = "SELECT    item.id, " +
+                        "item.likes, " +
+                        "item.marked, " +
+                        "item.explanation_id, " +
+                        "item.url, " +
+                        "item.description, " +
+                        "item.title, " +
+                        "item.simple, " +
+                        "item.reviewed, " +
+                        "item.public, " +
+                        "JSON_OBJECT( "+
+                            "'id', type.id, " +
+                            "'name', type.name, " +
+                            "'icon', type.icon, " +
+                            "'view_external', type.view_external " +
+                        " ) as type, " +
+                        "JSON_OBJECT( " +
+                            "'name', topic.name, " +
+                            "'id', topic.id, " +
+                            "'language', topic.language " +
+                        " ) as topic, " +
+                        "JSON_OBJECT( " +
+                            "'code', language.code, " +
+                            "'name', language.name " +
+                        " ) as language, " +
+                        "user_data.liked, " +
+                        "user_data.watched, " +
+                        "user_data.watchlist, " +
+                        "user_data.last_recommended " +
+                        "FROM item " +
+                        "INNER JOIN type ON type.id = item.type_id " +
+                        "INNER JOIN topic ON topic.id = item.topic_id " +
+                        "INNER JOIN language ON language.code = item.language " +
+                        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
+                        "WHERE user_data.watchlist=1 " +
+                        "AND item.id > ? ";
+    if(topics.length != 0){
+        sql +=          "AND item.topic_id IN (?) ";
+        queryData = [userId, startId, topics, limit];
+    }
+    sql +=              "ORDER BY item.id " +
+                        "LIMIT ? ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, queryData);
     return rows;
 }
@@ -344,41 +411,49 @@ export async function getReviewedItemsByUser(userId: number, limit:number, start
         topics = [];
     }
     let queryData: (number|number[]|string[])[] = [userId, userId, startId, limit];
-    let sql = "SELECT  item.id, " +
-        "item.likes, " +
-        "item.marked, " +
-        "item.explanation_id, " +
-        "item.url, " +
-        "item.url, " +
-        "item.description, " +
-        "item.title, " +
-        "item.language, " +
-        "item.simple, " +
-        "item.reviewed, " +
-        "item.created_by_id, " +
-        "item.topic_id, " +
-        "item.type_id, " +
-        "topic.name as topic_name, " +
-        "type.name as type_name, " +
-        "type.icon, " +
-        "type.view_external, " +
-        "user_data.liked, " +
-        "user_data.watched, " +
-        "user_data.watchlist, " +
-        "UNIX_TIMESTAMP(user_data.last_recommended) * 1000 as last_recommended " +
-        "FROM item " +
-        "INNER JOIN topic ON topic.id = item.topic_id " +
-        "INNER JOIN type ON type.id = item.type_id " +
-        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
-        "WHERE item.reviewed=1 " +
-        "AND item.reviewed_by_id = ? " +
-        "AND item.id > ? ";
-        if(topics.length != 0){
-            sql += "AND item.topic_id IN (?) ";
-            queryData = [userId, userId, startId, topics, limit];
-        }
-        sql += "ORDER BY item.id " +
-        "LIMIT ? ";
+    let sql = "SELECT    item.id, " +
+                        "item.likes, " +
+                        "item.marked, " +
+                        "item.explanation_id, " +
+                        "item.url, " +
+                        "item.description, " +
+                        "item.title, " +
+                        "item.simple, " +
+                        "item.reviewed, " +
+                        "item.public, " +
+                        "JSON_OBJECT( "+
+                            "'id', type.id, " +
+                            "'name', type.name, " +
+                            "'icon', type.icon, " +
+                            "'view_external', type.view_external " +
+                        " ) as type, " +
+                        "JSON_OBJECT( " +
+                            "'name', topic.name, " +
+                            "'id', topic.id, " +
+                            "'language', topic.language " +
+                        " ) as topic, " +
+                        "JSON_OBJECT( " +
+                            "'code', language.code, " +
+                            "'name', language.name " +
+                        " ) as language, " +
+                        "user_data.liked, " +
+                        "user_data.watched, " +
+                        "user_data.watchlist, " +
+                        "user_data.last_recommended " +
+                        "FROM item " +
+                        "INNER JOIN type ON type.id = item.type_id " +
+                        "INNER JOIN topic ON topic.id = item.topic_id " +
+                        "INNER JOIN language ON language.code = item.language " +
+                        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
+                        "WHERE item.reviewed=1 " +
+                        "AND item.reviewed_by_id = ? " +
+                        "AND item.id > ? ";
+    if(topics.length != 0){
+        sql +=          "AND item.topic_id IN (?) ";
+        queryData = [userId, userId, startId, topics, limit];
+    }
+    sql +=              "ORDER BY item.id " +
+                        "LIMIT ? ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, queryData);
     return rows;
 }
@@ -388,38 +463,48 @@ export async function getItemsToReview(userId: number, limit:number, startId: nu
         topics = [];
     }
     let queryData: (number|number[]|string[])[] = [userId, startId, limit];
-    let sql = "SELECT  item.id, " +
-        "item.likes, " +
-        "item.marked, " +
-        "item.explanation_id, " +
-        "item.url, " +
-        "item.description, " +
-        "item.title, " +
-        "item.language, " +
-        "item.simple, " +
-        "item.reviewed, " +
-        "item.topic_id, " +
-        "item.type_id, " +
-        "topic.name as topic_name, " +
-        "type.name as type_name, " +
-        "type.icon, " +
-        "type.view_external, " +
-        "user_data.liked, " +
-        "user_data.watched, " +
-        "user_data.watchlist, " +
-        "UNIX_TIMESTAMP(user_data.last_recommended) * 1000 as last_recommended " +
-        "FROM item " +
-        "INNER JOIN topic ON topic.id = item.topic_id " +
-        "INNER JOIN type ON type.id = item.type_id " +
-        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
-        "WHERE item.reviewed = 0 " +
-        "AND item.id > ? ";
-        if(topics.length != 0){
-            sql += "AND item.topic_id IN (?) ";
-            queryData = [userId, startId, topics, limit];
-        }
-        sql += "ORDER BY item.id " +
-        "LIMIT ? ";
+    let sql = "SELECT    item.id, " +
+                        "item.likes, " +
+                        "item.marked, " +
+                        "item.explanation_id, " +
+                        "item.url, " +
+                        "item.description, " +
+                        "item.title, " +
+                        "item.simple, " +
+                        "item.reviewed, " +
+                        "item.public, " +
+                        "JSON_OBJECT( "+
+                            "'id', type.id, " +
+                            "'name', type.name, " +
+                            "'icon', type.icon, " +
+                            "'view_external', type.view_external " +
+                        " ) as type, " +
+                        "JSON_OBJECT( " +
+                            "'name', topic.name, " +
+                            "'id', topic.id, " +
+                            "'language', topic.language " +
+                        " ) as topic, " +
+                        "JSON_OBJECT( " +
+                            "'code', language.code, " +
+                            "'name', language.name " +
+                        " ) as language, " +
+                        "user_data.liked, " +
+                        "user_data.watched, " +
+                        "user_data.watchlist, " +
+                        "user_data.last_recommended " +
+                        "FROM item " +
+                        "INNER JOIN type ON type.id = item.type_id " +
+                        "INNER JOIN topic ON topic.id = item.topic_id " +
+                        "INNER JOIN language ON language.code = item.language " +
+                        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
+                        "WHERE item.reviewed = 0 " +
+                        "AND item.id > ? ";
+    if(topics.length != 0){
+        sql +=          "AND item.topic_id IN (?) ";
+        queryData = [userId, startId, topics, limit];
+    }
+    sql +=              "ORDER BY item.id " +
+                        "LIMIT ? ";
     const [row] = await pool.query<RowDataPacket[]>(sql, queryData);
     return row;
 }
@@ -430,47 +515,58 @@ export async function getItemsWithFeedback(limit:number, startId: number, topics
     }
     const queryData: (number|number[]|string[])[] = [startId];
     let sql =   "SELECT  item.id, " +
-                "item.likes, " +
-                "item.marked, " +
-                "item.explanation_id, " +
-                "item.url, " +
-                "item.description, " +
-                "item.title, " +
-                "item.language, " +
-                "item.simple, " +
-                "item.reviewed, " +
-                "item.topic_id, " +
-                "item.type_id, " +
-                "topic.name as topic_name, " +
-                "type.name as type_name, " +
-                "type.icon, " +
-                "type.view_external, ";
-if(userId){
-    sql +=      "user_data.liked, " +
-                "user_data.watched, " +
-                "user_data.watchlist, ";
-}
-sql +=          "count(item.id) as feedback " +
-                "FROM item " +
-                "INNER JOIN topic ON topic.id = item.topic_id " +
-                "INNER JOIN type ON type.id = item.type_id " +
-                "INNER JOIN information_feedback ON information_feedback.information_id = item.id ";
-if(userId){
-    sql +=      "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? ";
-    queryData.unshift(userId);
-}
-sql +=          "WHERE item.reviewed = 1 " +
-                "AND item.id > ? ";
-if(topics.length != 0){
-sql +=          "AND item.topic_id IN (?) ";
-    queryData.push(topics);
-}
-sql +=          "GROUP BY item.id ";
-if(userId){
-    sql +=      ", user_data.liked, user_data.watched, user_data.watchlist, user_data.last_recommended ";
-}
-sql +=          "ORDER BY item.id " +
-                "LIMIT ? ";
+                        "item.likes, " +
+                        "item.marked, " +
+                        "item.explanation_id, " +
+                        "item.url, " +
+                        "item.description, " +
+                        "item.title, " +
+                        "item.simple, " +
+                        "item.reviewed, " +
+                        "item.public, " +
+                        "JSON_OBJECT( "+
+                            "'id', type.id, " +
+                            "'name', type.name, " +
+                            "'icon', type.icon, " +
+                            "'view_external', type.view_external " +
+                        " ) as type, " +
+                        "JSON_OBJECT( " +
+                            "'name', topic.name, " +
+                            "'id', topic.id, " +
+                            "'language', topic.language " +
+                        " ) as topic, " +
+                        "JSON_OBJECT( " +
+                            "'code', language.code, " +
+                            "'name', language.name " +
+                        " ) as language, ";
+    if(userId){
+        sql +=          "user_data.liked, " +
+                        "user_data.watched, " +
+                        "user_data.watchlist, " +
+                        "user_data.last_recommended, ";
+    }
+    sql +=              "count(item.id) as feedback " +
+                        "FROM item " +
+                        "INNER JOIN type ON type.id = item.type_id " +
+                        "INNER JOIN topic ON topic.id = item.topic_id " +
+                        "INNER JOIN language ON language.code = item.language " +
+                        "INNER JOIN information_feedback ON information_feedback.information_id = item.id ";
+    if(userId){
+        sql +=          "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? ";
+        queryData.unshift(userId);
+    }
+    sql +=              "WHERE item.reviewed = 1 " +
+                        "AND item.id > ? ";
+    if(topics.length != 0){
+    sql +=              "AND item.topic_id IN (?) ";
+        queryData.push(topics);
+    }
+    sql +=              "GROUP BY item.id ";
+    if(userId){
+        sql +=          ", user_data.liked, user_data.watched, user_data.watchlist, user_data.last_recommended ";
+    }
+    sql +=              "ORDER BY item.id " +
+                        "LIMIT ? ";
     queryData.push(limit);
     const [row] = await pool.query<RowDataPacket[]>(sql, queryData);
     return row;
@@ -486,19 +582,28 @@ export async function getSearchResult(query: string, limit: number, startId: num
                         "item.url, " +
                         "item.description, " +
                         "item.title, " +
-                        "item.language, " +
                         "item.simple, " +
                         "item.reviewed, " +
-                        "item.created_by_id, " +
-                        "item.topic_id, " +
-                        "item.type_id, " +
-                        "topic.name as topic_name, " +
-                        "type.name as type_name, " +
-                        "type.icon, " +
-                        "type.view_external " +
+                        "item.public, " +
+                        "JSON_OBJECT( "+
+                            "'id', type.id, " +
+                            "'name', type.name, " +
+                            "'icon', type.icon, " +
+                            "'view_external', type.view_external " +
+                        " ) as type, " +
+                        "JSON_OBJECT( " +
+                            "'name', topic.name, " +
+                            "'id', topic.id, " +
+                            "'language', topic.language " +
+                        " ) as topic, " +
+                        "JSON_OBJECT( " +
+                            "'code', language.code, " +
+                            "'name', language.name " +
+                        " ) as language " +
                         "FROM item " +
-                        "INNER JOIN topic ON topic.id = item.topic_id " +
                         "INNER JOIN type ON type.id = item.type_id " +
+                        "INNER JOIN topic ON topic.id = item.topic_id " +
+                        "INNER JOIN language ON language.code = item.language " +
                         "WHERE item.language IN (?) ";
 if(topics && topics.length){
     sql +=              "AND item.topic_id IN (?) ";
@@ -523,23 +628,32 @@ export async function getSearchResultUser(query: string, limit: number, startId:
                         "item.url, " +
                         "item.description, " +
                         "item.title, " +
-                        "item.language, " +
                         "item.simple, " +
                         "item.reviewed, " +
-                        "item.created_by_id, " +
-                        "item.topic_id, " +
-                        "item.type_id, " +
-                        "topic.name as topic_name, " +
-                        "type.name as type_name, " +
-                        "type.icon, " +
+                        "item.public, " +
+                        "JSON_OBJECT( "+
+                            "'id', type.id, " +
+                            "'name', type.name, " +
+                            "'icon', type.icon, " +
+                            "'view_external', type.view_external " +
+                        " ) as type, " +
+                        "JSON_OBJECT( " +
+                            "'name', topic.name, " +
+                            "'id', topic.id, " +
+                            "'language', topic.language " +
+                        " ) as topic, " +
+                        "JSON_OBJECT( " +
+                            "'code', language.code, " +
+                            "'name', language.name " +
+                        " ) as language, " +
                         "user_data.liked, " +
                         "user_data.watched, " +
                         "user_data.watchlist, " +
-                        "UNIX_TIMESTAMP(user_data.last_recommended) * 1000 as last_recommended, " +
-                        "type.view_external " +
+                        "user_data.last_recommended " +
                         "FROM item " +
-                        "INNER JOIN topic ON topic.id = item.topic_id " +
                         "INNER JOIN type ON type.id = item.type_id " +
+                        "INNER JOIN topic ON topic.id = item.topic_id " +
+                        "INNER JOIN language ON language.code = item.language " +
                         "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
                         "WHERE item.language IN (?) ";
 if(topics && topics.length){
