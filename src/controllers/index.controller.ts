@@ -10,6 +10,11 @@ import pool from '../lib/db';
 import { hasValidToken } from '../middleware';
 import { cookieToken } from '../interface/cookieToken';
 import { getUserByEmail, getUserByEmailWithPassword } from './user.controller';
+import fs from 'fs';
+import { promisify } from 'util';
+import handlebars from 'handlebars';
+const readFile = promisify(fs.readFile);
+import juice from 'juice';
 
 
 // import pool from '../lib/db';
@@ -102,25 +107,19 @@ export async function sendEmail(req: Request, res: Response): Promise<Response> 
         console.log("Emailversand an nicht exixstente Addresse!");
         return res.status(200).send("200");
     }
+    const html = await readFile('./src/emails/restorePassword.html', 'utf8');
+    const template = handlebars.compile(html);
+    const data = {
+        username: rows[0].username,
+        token: token
+    }
+    const htmlToSend = template(data);
     const mailOptions = {
         from: process.env.EMAIL_AUTH_USER,
         to: req.query.user as string,
-        subject: 'Passwort vergessen: Greenstream Project',
-        text: '',
-        html: `Hallo,
-        <br><br>
-        Jemand hat für ${req.query.user as string} ein neues Passwort für Greenstream angefordert.
-        <br><br>
-        Du kannst das Passwort mit folgendem Link ändern:
-        <br><br>
-        <a href="https://appsterdb.ackermann.digital/passwordRestore/${token}">Passwort ändern</a>
-        <br><br>
-        Wenn du das nicht warst ignoriere diese Nachricht bitte. Dein Passwort ändert sich dann  nicht.
-        <br><br>
-        Mit freundlichen Grüßen
-        <br><br>
-        dein Greenstream-Team
-        `
+        subject: 'Greenstream Project: Passwort zurücksetzen',
+        text: `Bitte folgen Sie folgendem Link: https://appsterdb.ackermann.digital/passwordRestore/${token}`,
+        html: juice(htmlToSend)
     };
     transporter.sendMail(mailOptions, function (error: Error | null, info: any) {
         if (error) {
