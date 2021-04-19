@@ -208,6 +208,7 @@ export async function getItemsByUser(userId: number, limit:number, startId: numb
                         "item.public, " +
                         "item.position, " +
                         "item.created_by_id, " +
+                        "item.created, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
                             "'name', type.name, " +
@@ -233,8 +234,6 @@ export async function getItemsByUser(userId: number, limit:number, startId: numb
                         "INNER JOIN language ON language.code = item.language " +
                         "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
                         "WHERE item.created_by_id = ? " +
-                        "AND item.topic_id = topic.id " +
-                        "AND type.id = item.type_id " +
                         "AND item.created < ? " +
                         "AND item.topic_id IN (?) " +
                         "ORDER BY item.created DESC " +
