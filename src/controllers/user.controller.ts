@@ -22,7 +22,6 @@ export async function getUserWithPassword(id: number): Promise<RowDataPacket> {
         "show_in_app, " +
         "notification_time, " +
         "UNIX_TIMESTAMP(last_change) * 1000 as last_change, " +
-        "language " +
         "FROM user " +
         "WHERE id = ?;"
     const [row] = await pool.query<RowDataPacket[]>(sql, [id]);
@@ -53,12 +52,10 @@ export async function getUserByEmailWithPassword(email: string): Promise<RowData
         "role, " +
         "show_in_app, " +
         "notification_time, " +
-        "UNIX_TIMESTAMP(last_change) * 1000 as last_change, " +
-        "language " +
+        "UNIX_TIMESTAMP(last_change) * 1000 as last_change " +
         "FROM user " +
         "WHERE email = ?;"
     const [row] = await pool.query<RowDataPacket[]>(sql, [email]);
-    row[0].language = row[0].language.split(',').filter(removeEmptyStrings);
     const query = "SELECT topic.*, " +
         "case when u.topic = topic.id then true else false end as selected " +
         "from user_topics u " +
