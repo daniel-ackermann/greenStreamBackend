@@ -684,7 +684,7 @@ sql +=                  "AND ( item.title LIKE ? OR item.description LIKE ? ) " 
 export async function recalculateItemPositions(): Promise<void>{
     const sql = "UPDATE item, " +
                 "(SELECT id, " +
-                        "ROW_NUMBER() OVER (PARTITION BY public ORDER BY score + watched * likes * marked + watchlist DESC, id) AS pos " +
+                        "ROW_NUMBER() OVER (PARTITION BY public ORDER BY score + watched * likes * marked + watchlist DESC) AS pos " +
                         "FROM item " +
                         "ORDER BY pos ASC " +
                 ") AS positions " +
