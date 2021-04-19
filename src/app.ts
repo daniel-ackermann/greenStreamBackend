@@ -31,6 +31,7 @@ export class App {
         this.middleware();
         this.routes();
 
+        recalculateItemPositions();
         setInterval(() => {
             recalculateItemPositions();
         }, 1000 * 60 * parseInt(process.env.POSITION_RECALCULATE_INTERVAL || "5"));
