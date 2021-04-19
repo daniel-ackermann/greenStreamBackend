@@ -38,14 +38,14 @@ export async function getAllItems(lang?: string): Promise<RowDataPacket[]> {
                         "INNER JOIN topic ON topic.id = item.topic_id " +
                         "INNER JOIN language ON language.code = item.language " +
                         "WHERE item.language IN (?) " +
-                        "AND item.reviewed = 1 "+
+                        "AND item.reviewed > 0 "+
                         "AND item.public = 1 " +
-                        "ORDER BY item.id ";
+                        "ORDER BY item.pos ASC ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [languages]);
     return rows;
 }
 
-export async function getItems(id:number, limit: number, lang = "", topics: string[]| number[]): Promise<RowDataPacket[]> {
+export async function getItems(position:number, limit: number, lang = "", topics: string[]| number[]): Promise<RowDataPacket[]> {
     if(!topics || !topics.length){
         topics = environment.defaultTopics;
     }
@@ -60,6 +60,7 @@ export async function getItems(id:number, limit: number, lang = "", topics: stri
                         "item.simple, " +
                         "item.reviewed, " +
                         "item.public, " +
+                        "item.position, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
                             "'name', type.name, " +
@@ -80,17 +81,17 @@ export async function getItems(id:number, limit: number, lang = "", topics: stri
                         "INNER JOIN topic ON topic.id = item.topic_id " +
                         "INNER JOIN language ON language.code = item.language " +
                         "WHERE item.language IN (?) " +
-                        "AND item.reviewed = 1 " +
-                        "AND item.id > ? " +
+                        "AND item.reviewed > 0 " +
+                        "AND item.position > ? " +
                         "AND item.public = 1 " +
                         "AND item.topic_id IN (?) " +
-                        "ORDER BY item.id " +
+                        "ORDER BY item.position ASC " +
                         "LIMIT ? ";
-    const [rows] = await pool.query<RowDataPacket[]>(sql, [languages, id, topics, limit]);
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [languages, position, topics, limit]);
     return rows;
 }
 
-export async function getItemsWithUserData(userId: number, id:number, limit: number,topics: string[]|number[],  lang?: string): Promise<RowDataPacket[]> {
+export async function getItemsWithUserData(userId: number, position:number, limit: number,topics: string[]|number[],  lang?: string): Promise<RowDataPacket[]> {
     if(!topics || !topics.length){
         topics = environment.defaultTopics;
     }
@@ -105,6 +106,7 @@ export async function getItemsWithUserData(userId: number, id:number, limit: num
                         "item.simple, " +
                         "item.reviewed, " +
                         "item.public, " +
+                        "item.position, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
                             "'name', type.name, " +
@@ -131,16 +133,16 @@ export async function getItemsWithUserData(userId: number, id:number, limit: num
                         "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
                         "WHERE item.language IN (?) " +
                         "AND item.topic_id IN (?) " +
-                        "AND item.reviewed = 1 " +
+                        "AND item.reviewed > 0 " +
                         "AND item.public = 1 " +
-                        "AND item.id > ? " +
-                        "ORDER BY item.id " +
+                        "AND item.position > ? " +
+                        "ORDER BY item.position ASC " +
                         "LIMIT ? ";
-    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, languages, topics, id, limit]);
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, languages, topics, position, limit]);
     return rows;
 }
 
-export async function getSuggestedItems(userId: number, startId:number, limit: number, lang?:string): Promise<RowDataPacket[]> {
+export async function getSuggestedItems(userId: number, position:number, limit: number, lang?:string): Promise<RowDataPacket[]> {
     const languages = parseLanguage(lang);
     const sql = "SELECT  item.id, " +
                         "item.likes, " +
@@ -152,6 +154,7 @@ export async function getSuggestedItems(userId: number, startId:number, limit: n
                         "item.simple, " +
                         "item.reviewed, " +
                         "item.public, " +
+                        "item.position, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
                             "'name', type.name, " +
@@ -175,22 +178,21 @@ export async function getSuggestedItems(userId: number, startId:number, limit: n
                         "INNER JOIN type ON type.id = item.type_id " +
                         "INNER JOIN topic ON topic.id = item.topic_id " +
                         "INNER JOIN language ON language.code = item.language " +
-                        "INNER JOIN user_topics ON user_topics.topic = item.topic_id " +
+                        "INNER JOIN user_topics ON user_topics.topic = item.topic_id AND user_topics.user = ? " +
                         "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
                         "WHERE item.language IN (?) " +
-                        "AND item.reviewed = 1 " +
+                        "AND item.reviewed > 0 " +
                         "AND item.created_by_id != ? " +
-                        "AND item.id > ? " +
+                        "AND item.position > ? " +
                         "AND item.public = 1 " +
-                        "AND user_topics.user = ? " +
-                        "ORDER BY item.id " +
+                        "ORDER BY item.position ASC " +
                         "LIMIT ? ";
-    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, languages, userId, startId, userId, limit]);
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, userId, languages, userId, position, limit]);
     return rows;
 }
 
 // email oder id?
-export async function getItemsByUser(userId: number, limit:number, startId: number,topics: string[]|number[]): Promise<RowDataPacket[]> {
+export async function getItemsByUser(userId: number, limit:number, startId: number, topics: string[]|number[]): Promise<RowDataPacket[]> {
     if(!topics || !topics.length){
         topics = environment.defaultTopics;
     }
@@ -204,6 +206,8 @@ export async function getItemsByUser(userId: number, limit:number, startId: numb
                         "item.simple, " +
                         "item.reviewed, " +
                         "item.public, " +
+                        "item.position, " +
+                        "item.created_by_id, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
                             "'name', type.name, " +
@@ -231,11 +235,11 @@ export async function getItemsByUser(userId: number, limit:number, startId: numb
                         "WHERE item.created_by_id = ? " +
                         "AND item.topic_id = topic.id " +
                         "AND type.id = item.type_id " +
-                        "AND item.id > ? " +
+                        "AND item.created < ? " +
                         "AND item.topic_id IN (?) " +
-                        "ORDER BY item.id " +
+                        "ORDER BY item.created DESC " +
                         "LIMIT ? ";
-    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, userId, startId,  topics, limit]);
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, userId, startId, topics, limit]);
     return rows;
 }
 
@@ -267,6 +271,7 @@ export async function getLikedItems(userId: number, limit:number, startId: numbe
                         "item.simple, " +
                         "item.reviewed, " +
                         "item.public, " +
+                        "item.position, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
                             "'name', type.name, " +
@@ -291,14 +296,14 @@ export async function getLikedItems(userId: number, limit:number, startId: numbe
                         "INNER JOIN topic ON topic.id = item.topic_id " +
                         "INNER JOIN language ON language.code = item.language " +
                         "INNER JOIN user_data ON user_data.id = item.id " +
-                        "AND user_data.liked = 1 " +
+                        "AND user_data.liked " +
                         "AND user_data.user_id = ? " +
-                        "WHERE item.id > ? ";
+                        "WHERE user_data.liked < ? ";
     if(topics.length != 0){
         sql +=          "AND item.topic_id IN (?) ";
         queryData = [userId, startId, topics, limit];
     }
-    sql +=              "ORDER BY item.id " +
+    sql +=              "ORDER BY user_data.liked DESC " +
                         "LIMIT ? ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, queryData);
     return rows;
@@ -319,6 +324,7 @@ export async function getWatchedItems(userId: number, limit:number, startId: num
                         "item.simple, " +
                         "item.reviewed, " +
                         "item.public, " +
+                        "item.position, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
                             "'name', type.name, " +
@@ -342,14 +348,13 @@ export async function getWatchedItems(userId: number, limit:number, startId: num
                         "INNER JOIN type ON type.id = item.type_id " +
                         "INNER JOIN topic ON topic.id = item.topic_id " +
                         "INNER JOIN language ON language.code = item.language " +
-                        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
-                        "WHERE user_data.watched=1 " +
-                        "AND item.id > ? ";
+                        "INNER JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? AND user_data.watched IS NOT NULL " +
+                        "WHERE user_data.watched < ? ";
     if(topics.length != 0){
         sql +=          "AND item.topic_id IN (?) ";
         queryData = [userId, startId, topics, limit];
     }
-    sql +=              "ORDER BY item.id " +
+    sql +=              "ORDER BY user_data.watched DESC " +
                         "LIMIT ? ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, queryData);
     return rows;
@@ -370,6 +375,7 @@ export async function getWatchListItems(userId: number, limit:number, startId: n
                         "item.simple, " +
                         "item.reviewed, " +
                         "item.public, " +
+                        "item.position, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
                             "'name', type.name, " +
@@ -393,14 +399,13 @@ export async function getWatchListItems(userId: number, limit:number, startId: n
                         "INNER JOIN type ON type.id = item.type_id " +
                         "INNER JOIN topic ON topic.id = item.topic_id " +
                         "INNER JOIN language ON language.code = item.language " +
-                        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
-                        "WHERE user_data.watchlist=1 " +
-                        "AND item.id > ? ";
+                        "INNER JOIN user_data ON user_data.id = item.id AND user_data.watchlist IS NOT NULL AND user_data.user_id = ? " +
+                        "WHERE user_data.watchlist < ? ";
     if(topics.length != 0){
         sql +=          "AND item.topic_id IN (?) ";
         queryData = [userId, startId, topics, limit];
     }
-    sql +=              "ORDER BY item.id " +
+    sql +=              "ORDER BY user_data.watchlist DESC " +
                         "LIMIT ? ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, queryData);
     return rows;
@@ -421,6 +426,7 @@ export async function getReviewedItemsByUser(userId: number, limit:number, start
                         "item.simple, " +
                         "item.reviewed, " +
                         "item.public, " +
+                        "item.position, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
                             "'name', type.name, " +
@@ -447,12 +453,12 @@ export async function getReviewedItemsByUser(userId: number, limit:number, start
                         "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
                         "WHERE item.reviewed=1 " +
                         "AND item.reviewed_by_id = ? " +
-                        "AND item.id > ? ";
+                        "AND item.position > ? ";
     if(topics.length != 0){
         sql +=          "AND item.topic_id IN (?) ";
         queryData = [userId, userId, startId, topics, limit];
     }
-    sql +=              "ORDER BY item.id " +
+    sql +=              "ORDER BY item.position " +
                         "LIMIT ? ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, queryData);
     return rows;
@@ -473,6 +479,7 @@ export async function getItemsToReview(userId: number, limit:number, startId: nu
                         "item.simple, " +
                         "item.reviewed, " +
                         "item.public, " +
+                        "item.position, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
                             "'name', type.name, " +
@@ -497,7 +504,7 @@ export async function getItemsToReview(userId: number, limit:number, startId: nu
                         "INNER JOIN topic ON topic.id = item.topic_id " +
                         "INNER JOIN language ON language.code = item.language " +
                         "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
-                        "WHERE item.reviewed = 0 " +
+                        "WHERE item.reviewed IS NULL " +
                         "AND item.id > ? ";
     if(topics.length != 0){
         sql +=          "AND item.topic_id IN (?) ";
@@ -509,11 +516,11 @@ export async function getItemsToReview(userId: number, limit:number, startId: nu
     return row;
 }
 
-export async function getItemsWithFeedback(limit:number, startId: number, topics: string[]|number[], userId?: number): Promise<RowDataPacket[]>{
+export async function getItemsWithFeedback(limit:number, position: number, topics: string[]|number[], userId?: number): Promise<RowDataPacket[]>{
     if(!topics || !topics.length){
         topics = [];
     }
-    const queryData: (number|number[]|string[])[] = [startId];
+    const queryData: (number|number[]|string[])[] = [position];
     let sql =   "SELECT  item.id, " +
                         "item.likes, " +
                         "item.marked, " +
@@ -524,6 +531,7 @@ export async function getItemsWithFeedback(limit:number, startId: number, topics
                         "item.simple, " +
                         "item.reviewed, " +
                         "item.public, " +
+                        "item.position, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
                             "'name', type.name, " +
@@ -555,7 +563,7 @@ export async function getItemsWithFeedback(limit:number, startId: number, topics
         sql +=          "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? ";
         queryData.unshift(userId);
     }
-    sql +=              "WHERE item.reviewed = 1 " +
+    sql +=              "WHERE item.reviewed > 0 " +
                         "AND item.id > ? ";
     if(topics.length != 0){
     sql +=              "AND item.topic_id IN (?) ";
@@ -572,9 +580,9 @@ export async function getItemsWithFeedback(limit:number, startId: number, topics
     return row;
 }
 
-export async function getSearchResult(query: string, limit: number, startId: number, topics: string[]|number[], lang?: string): Promise<RowDataPacket[]> {
+export async function getSearchResult(query: string, limit: number, position: number, topics: string[]|number[], lang?: string): Promise<RowDataPacket[]> {
     const languages = parseLanguage(lang);
-    const queryData: (number|number[]|string|string[])[] = [languages, "%" + query + "%", "%" + query + "%", startId, limit];
+    const queryData: (number|number[]|string|string[])[] = [languages, "%" + query + "%", "%" + query + "%", position, limit];
     let sql = "SELECT    item.id, " +
                         "item.likes, " +
                         "item.marked, " +
@@ -585,6 +593,7 @@ export async function getSearchResult(query: string, limit: number, startId: num
                         "item.simple, " +
                         "item.reviewed, " +
                         "item.public, " +
+                        "item.position, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
                             "'name', type.name, " +
@@ -610,14 +619,15 @@ if(topics && topics.length){
     queryData.splice(1, 0, topics);
 }
 sql +=                  "AND ( item.title LIKE ? OR item.description LIKE ? ) " +
-                        "AND item.reviewed = 1 " +
+                        "AND item.reviewed > 0 " +
                         "AND item.public = 1 " +
-                        "AND item.id > ? " +
-                        "ORDER BY item.id " +
+                        "AND item.position > ? " +
+                        "ORDER BY item.position ASC " +
                         "LIMIT ? ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, queryData);
     return rows;
 }
+
 export async function getSearchResultUser(query: string, limit: number, startId: number, topics: string[]|number[], userId: number, lang?: string): Promise<RowDataPacket[]> {
     const languages = parseLanguage(lang);
     const queryData: (number|number[]|string|string[])[] = [userId, languages, "%" + query + "%", "%" + query + "%", startId, limit];
@@ -631,6 +641,7 @@ export async function getSearchResultUser(query: string, limit: number, startId:
                         "item.simple, " +
                         "item.reviewed, " +
                         "item.public, " +
+                        "item.position, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
                             "'name', type.name, " +
@@ -661,11 +672,24 @@ if(topics && topics.length){
     queryData.splice(2, 0, topics);
 }
 sql +=                  "AND ( item.title LIKE ? OR item.description LIKE ? ) " +
-                        "AND item.reviewed = 1 " +
+                        "AND item.reviewed > 0 " +
                         "AND item.public = 1 " +
-                        "AND item.id > ? " +
-                        "ORDER BY item.id " +
+                        "AND item.position > ? " +
+                        "ORDER BY item.position ASC " +
                         "LIMIT ? ";
     const [rows] = await pool.query<RowDataPacket[]>(sql, queryData);
     return rows;
+}
+
+export async function recalculateItemPositions(): Promise<void>{
+    const sql = "UPDATE item, " +
+                "(SELECT id, " +
+                        "ROW_NUMBER() OVER (PARTITION BY reviewed ORDER BY score DESC) AS pos " +
+                        "FROM item " +
+                        "ORDER BY score + watched * likes * marked + watchlist ASC " +
+                ") AS positions " +
+                "SET item.position = positions.pos " +
+                "WHERE item.id = positions.id ";
+    await pool.query(sql, []);
+    console.log("Item Reihenfolge neu berechnet");
 }

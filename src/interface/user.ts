@@ -27,3 +27,8 @@ export interface UpdateUser {
     topics?: number[];
     id: number;
 }
+
+export interface PublicUser {
+    username: string;
+    id: number;
+}

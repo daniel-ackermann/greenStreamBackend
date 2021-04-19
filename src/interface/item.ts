@@ -27,4 +27,6 @@ export class Item {
     liked: number|null = null;              // 1 wenn geliked, 0 sonst
     watched: number|null = null;            // 1 wenn angesehen, 0 sonst
     watchlist: number|null = null;          // 1 wenn auf watchlater, 0 sonst
+    created: number = Math.floor(new Date().getTime() / 1000);
+    score = 100;
 }

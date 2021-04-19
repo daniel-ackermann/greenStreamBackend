@@ -18,6 +18,7 @@ import UserRoutes from './routes/user.routes';
 import FeedbackRoutes from './routes/feedback.routes';
 import FeedbacksRoutes from './routes/feedbacks.routes';
 import LanguageRoutes from './routes/language.routes';
+import { recalculateItemPositions } from './controllers/items.controller';
 import * as https from 'https';
 import compression from 'compression';
 
@@ -29,6 +30,10 @@ export class App {
     ) {
         this.middleware();
         this.routes();
+
+        setInterval(() => {
+            recalculateItemPositions();
+        }, 1000 * 60 * parseInt(process.env.POSITION_RECALCULATE_INTERVAL || "5"));
     }
 
     private middleware() {
