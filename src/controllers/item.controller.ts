@@ -20,6 +20,7 @@ export async function getItem(id: number): Promise<RowDataPacket> {
         "item.simple, " +
         "item.reviewed, " +
         "item.public, " +
+        "item.score, " +
         "JSON_OBJECT( " +
             "'id', type.id, " +
             "'name', type.name, " +
@@ -108,6 +109,7 @@ export async function getItemWithUserData(id: number, userId: number): Promise<R
         "item.simple, " +
         "item.reviewed, " +
         "item.public, " +
+        "item.score, " +
         "JSON_OBJECT( " +
             "'id', type.id, " +
             "'name', type.name, " +
