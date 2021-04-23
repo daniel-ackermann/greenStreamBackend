@@ -21,6 +21,7 @@ export async function getItem(id: number): Promise<RowDataPacket> {
         "item.reviewed, " +
         "item.public, " +
         "item.score, " +
+        "item.readingDuration, " +
         "JSON_OBJECT( " +
             "'id', type.id, " +
             "'name', type.name, " +
@@ -110,6 +111,7 @@ export async function getItemWithUserData(id: number, userId: number): Promise<R
         "item.reviewed, " +
         "item.public, " +
         "item.score, " +
+        "item.readingDuration, " +
         "JSON_OBJECT( " +
             "'id', type.id, " +
             "'name', type.name, " +
@@ -146,7 +148,7 @@ export async function deleteItem(id: number): Promise<ResultSetHeader> {
 }
 
 export async function updateItem(id: number, updateItem: Item): Promise<ResultSetHeader> {
-    const [result] = await pool.query<ResultSetHeader>('UPDATE item set explanation_id = ?, type_id = ?, url = ?, description = ?, title = ?, topic_id = ?, simple = ?, public=?, score = ? WHERE id = ?', [updateItem.explanation_id, updateItem.type.id, updateItem.url, updateItem.description, updateItem.title, updateItem.topic.id, updateItem.simple, updateItem.public, updateItem.score, id]);
+    const [result] = await pool.query<ResultSetHeader>('UPDATE item set explanation_id = ?, type_id = ?, url = ?, description = ?, title = ?, topic_id = ?, simple = ?, public=?, score = ?, readingDuration = ? WHERE id = ?', [updateItem.explanation_id, updateItem.type.id, updateItem.url, updateItem.description, updateItem.title, updateItem.topic.id, updateItem.simple, updateItem.public, updateItem.score, updateItem.readingDuration, id]);
     return result;
 }
 
