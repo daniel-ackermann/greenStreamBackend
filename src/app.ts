@@ -12,8 +12,6 @@ import LabelsRoutes from './routes/labels.routes';
 import ItemsRoutes from './routes/items.routes';
 import TopicRoutes from './routes/topic.routes';
 import TypeRoutes from './routes/type.routes';
-import FullRoutes from './routes/full.routes';
-import FullUserRoutes from './routes/fullUser.routes';
 import UserRoutes from './routes/user.routes';
 import FeedbackRoutes from './routes/feedback.routes';
 import FeedbacksRoutes from './routes/feedbacks.routes';
@@ -65,8 +63,6 @@ export class App {
         this.app.use('/api/labels', LabelsRoutes);
         this.app.use('/api/topics', TopicRoutes);
         this.app.use('/api/types', TypeRoutes);
-        this.app.use('/api/full', FullRoutes);
-        this.app.use('/api/fullUser', FullUserRoutes);
         this.app.use("/api/user", UserRoutes);
         this.app.use("/api/feedback", FeedbackRoutes);
         this.app.use("/api/feedbacks", FeedbacksRoutes);
