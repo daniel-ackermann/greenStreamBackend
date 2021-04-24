@@ -118,6 +118,48 @@ export async function getItemWithUserData(id: number, userId: number): Promise<R
     return rows[0];
 }
 
+export async function getRecommendedItem(user: number): Promise<RowDataPacket>{
+    const sql = "SELECT  item.id, " +
+                        "item.likes, " +
+                        "item.marked, " +
+                        "item.explanation_id, " +
+                        "item.url, " +
+                        "item.description, " +
+                        "item.title, " +
+                        "item.simple, " +
+                        "item.reviewed, " +
+                        "item.public, " +
+                        "item.score, " +
+                        "item.readingDuration, " +
+                        "JSON_OBJECT( " +
+                            "'id', type.id, " +
+                            "'name', type.name, " +
+                            "'icon', type.icon, " +
+                            "'view_external', type.view_external " +
+                        " ) as type, " +
+                        "JSON_OBJECT( " +
+                            "'name', topic.name, " +
+                            "'id', topic.id, " +
+                            "'language', topic.language " +
+                        " ) as topic, " +
+                        "JSON_OBJECT( " +
+                            "'code', language.code, " +
+                            "'name', language.name " +
+                        " ) as language, " +
+                        "user_data.liked, " +
+                        "user_data.watched, " +
+                        "user_data.watchlist, " +
+                        "user_data.last_recommended " +
+                        "FROM item " +
+                        "INNER JOIN type ON type.id = item.type_id " +
+                        "INNER JOIN topic ON topic.id = item.topic_id " +
+                        "INNER JOIN language ON language.code = item.language " +
+                        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
+                        "ORDER BY user_data.last_recommended, item.score + RAND() * 100 " +
+                        "LIMIT 1 ";
+    const [result] = await pool.query<RowDataPacket[]>(sql, [user]);
+    return result[0];
+}
 
 export async function deleteItem(id: number): Promise<ResultSetHeader> {
     const [result] = await pool.execute<ResultSetHeader>('DELETE FROM item WHERE item.id = ?', [id]);

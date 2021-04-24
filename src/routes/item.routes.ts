@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { Request, Response } from '../interface/custom.request'
-import { setItemStatus, getItem, deleteItem, updateItem, getItemWithUserData, reviewItem, addItem } from '../controllers/item.controller';
+import { setItemStatus, getItem, deleteItem, updateItem, getItemWithUserData, reviewItem, addItem, getRecommendedItem } from '../controllers/item.controller';
 import { Item } from '../interface/item';
 import { authenticate, hasValidToken } from '../middleware';
 
@@ -42,6 +42,13 @@ router.route('/status/:type/:id')
         } catch (e) {
             return res.status(422).send();
         }
+    });
+
+router.route('/recommended')
+    .get(authenticate, async (req: Request, res: Response) => {
+        const item = await getRecommendedItem(req.token.id);
+        setItemStatus(req.token.id, item.id, "last_recommended", Math.floor(new Date().getTime() / 1000))
+        return res.json(item);
     });
 
 router.route('/:itemId')
