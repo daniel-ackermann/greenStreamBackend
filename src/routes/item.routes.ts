@@ -1,8 +1,7 @@
 import { Router } from 'express'
 import { Request, Response } from '../interface/custom.request'
-import { updateStatus, getItem, deleteItem, updateItem, getItemWithUserData, reviewItem, addItem } from '../controllers/item.controller';
+import { setItemStatus, getItem, deleteItem, updateItem, getItemWithUserData, reviewItem, addItem } from '../controllers/item.controller';
 import { Item } from '../interface/item';
-import { UserData } from '../interface/userdata';
 import { authenticate, hasValidToken } from '../middleware';
 
 const router = Router();
@@ -25,13 +24,21 @@ router.route('/review/:id')
         }
     })
 
-router.route('/status/:id/:type')
+router.route('/status/:type/:id')
     .put(authenticate, async (req: Request, res: Response) => {
         try {
-            const value: UserData = { id: parseInt(req.params.id) };
-            value[req.params.type as "liked" | "watched" | "watchlist" | "last_recommended"] = req.body.value;
-            updateStatus(parseInt(req.token.id, 10), value);
-            return res.json(200);
+            const item = parseInt(req.params.id, 10);
+            const user = parseInt(req.token.id);
+            setItemStatus(user, item, req.params.type, Math.floor(new Date().getTime() / 1000) );
+        } catch (e) {
+            return res.status(422).send();
+        }
+    })
+    .delete(authenticate, async (req: Request, res: Response) => {
+        try {
+            const item = parseInt(req.params.id, 10);
+            const user = parseInt(req.token.id);
+            setItemStatus(user, item, req.params.type, null);
         } catch (e) {
             return res.status(422).send();
         }
@@ -47,7 +54,7 @@ router.route('/:itemId')
             return res.status(422).send();
         }
         if (req.cookies.jwt && req.token != false) {
-            updateStatus(req.token.id, { id: id, watched: Math.floor(new Date().getTime() / 1000) });
+            setItemStatus(req.token.id, id, "watched", Math.floor(new Date().getTime() / 1000) );
             return res.json(
                 await getItemWithUserData(id, req.token.id)
             );
@@ -80,15 +87,5 @@ router.route('/:itemId')
             return res.status(422).send();
         }
     });
-
-router.route('/status')
-    .post(authenticate, async (req: Request, res: Response) => {
-        try {
-            updateStatus(parseInt(req.token.id, 10), req.body as UserData)
-            return res.json(200)
-        } catch (e) {
-            return res.status(422).send();
-        }
-    })
 
 export default router;
