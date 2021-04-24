@@ -27,7 +27,8 @@ export async function getTypes(language?: string): Promise<RowDataPacket[]> {
     const languages = parseLanguage(language);
     const sql = "SELECT  type.id, " +
         "type.name, " +
-        "type.view_external " +
+        "type.view_external, " +
+        "type.icon " +
         "FROM " +
         "type " +
         "WHERE language IN (?) ";
