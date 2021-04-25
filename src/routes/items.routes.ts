@@ -149,10 +149,16 @@ router.route('/search/:limit/:startId/:query?')
         return res.json(result);
     });
 
-router.route('/trending/:counter')
+router.route('/trending/:limit')
     .get(async (req: Request, res: Response) => {
+        let limit: number;
+        try{
+            limit = parseInt(req.params.limit);
+        } catch (e){
+            limit = 5;
+        }
         return res.json(
-            await getTrendingItems()
+            await getTrendingItems(limit)
         );
     })
 
