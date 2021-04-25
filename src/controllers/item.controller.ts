@@ -4,7 +4,7 @@ import { UserData } from '../interface/userdata';
 import pool from '../lib/db';
 
 export async function addItem(item: Item): Promise<Item> {
-    const [rows] = await pool.query<ResultSetHeader>('INSERT INTO item SET ?', [item]);
+    const [rows] = await pool.query<ResultSetHeader>('INSERT INTO item SET explanation_id = ?, type_id = ?, url = ?, description = ?, title = ?, topic_id = ?, simple = ?, public=?, score = ?, readingDuration = ? ', [item.explanation_id, item.type.id, item.url, item.description, item.title, item.topic.id, item.simple, item.public, item.score, item.readingDuration]);
     item.id = rows.insertId;
     return item;
 }
@@ -50,11 +50,13 @@ export async function setItemStatus(user: number, item: number, type: string, va
     let sql = "SELECT * FROM user_data  WHERE user_id = ? AND id = ?;";
     const [result] = await pool.query<RowDataPacket[]>(sql, [user, item]);
     if (result.length > 0) {
+        console.log(result);
         result[0][type] = value;
+        console.log(result);
         if (result[0].liked === null && result[0].watchlist === null && result[0].watched === null) {
             // delete if not longer needed => all are NULL
             sql = "DELETE FROM user_data WHERE user_id = ? AND id = ?;";
-            pool.query(sql, [user, item]);
+            await pool.query(sql, [user, item]);
         } else {
             sql = "UPDATE user_data SET " + type + " = ? WHERE user_id = ? AND id = ?;";
             const queryData = [
@@ -62,7 +64,7 @@ export async function setItemStatus(user: number, item: number, type: string, va
                 user,
                 item
             ];
-            pool.query(sql, queryData);
+            await pool.query(sql, queryData);
         }
     } else {
         sql = "INSERT INTO user_data (user_id, id, " + type + ") VALUES (?, ?, ?)";
