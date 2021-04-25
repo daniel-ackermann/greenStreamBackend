@@ -29,7 +29,9 @@ router.route('/status/:type/:id')
         try {
             const item = parseInt(req.params.id, 10);
             const user = parseInt(req.token.id);
-            setItemStatus(user, item, req.params.type, Math.floor(new Date().getTime() / 1000) );
+            return res.status(
+                await setItemStatus(user, item, req.params.type, Math.floor(new Date().getTime() / 1000) )
+            ).send();
         } catch (e) {
             return res.status(422).send();
         }
@@ -38,7 +40,9 @@ router.route('/status/:type/:id')
         try {
             const item = parseInt(req.params.id, 10);
             const user = parseInt(req.token.id);
-            setItemStatus(user, item, req.params.type, null);
+            return res.status(
+                await setItemStatus(user, item, req.params.type, null)
+            ).send();
         } catch (e) {
             return res.status(422).send();
         }
