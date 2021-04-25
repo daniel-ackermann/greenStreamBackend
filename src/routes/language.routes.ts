@@ -5,8 +5,8 @@ import { getLanguages } from '../controllers/language.controller';
 const router = Router();
 
 router.route('/')
-    .get((req: Request, res: Response) => {
-        res.json(getLanguages());
+    .get(async (req: Request, res: Response) => {
+        res.json(await getLanguages());
     });
 
 export default router;
