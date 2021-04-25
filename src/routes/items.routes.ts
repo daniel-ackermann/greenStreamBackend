@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { Request, Response } from '../interface/custom.request'
-import { getItems, getReviewedItemsByUser, getItemsByUser, getItemsToReview, getLikedItems, getWatchListItems, getWatchedItems, getItemsWithUserData, getSuggestedItems, getItemsWithFeedback, getSearchResult, getSearchResultUser } from '../controllers/items.controller'
+import { getItems, getReviewedItemsByUser, getItemsByUser, getItemsToReview, getLikedItems, getWatchListItems, getWatchedItems, getItemsWithUserData, getSuggestedItems, getItemsWithFeedback, getSearchResult, getSearchResultUser, getTrendingItems } from '../controllers/items.controller'
 import { authenticate, hasValidToken } from '../middleware';
 import { RowDataPacket } from 'mysql2';
 
@@ -149,6 +149,13 @@ router.route('/search/:limit/:startId/:query?')
         return res.json(result);
     });
 
+router.route('/trending/:counter')
+    .get(async (req: Request, res: Response) => {
+        return res.json(
+            getTrendingItems()
+        );
+    })
+
 router.route('/:limit/:startId?')
     .get(async (req: Request, res: Response) => {
         req.token = hasValidToken(req.cookies.jwt);
@@ -169,7 +176,7 @@ router.route('/:limit/:startId?')
                     );
                 }
             } else {
-                console.log("\ttopics\t => getItems\t" + req.query.topics);
+                console.log("\ttopics\t => getItems\t Topics: " + req.query.topics);
                 const data = await getItems(parseInt(req.params.startId) || 0, parseInt(req.params.limit), req.headers["accept-language"], req.query.topics as string[])
                 return res.status(200).json(data);
             }
