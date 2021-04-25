@@ -459,7 +459,7 @@ export async function getReviewedItemsByUser(userId: number, limit:number, start
                         "INNER JOIN topic ON topic.id = item.topic_id " +
                         "INNER JOIN language ON language.code = item.language " +
                         "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
-                        "WHERE item.reviewed=1 " +
+                        "WHERE item.reviewed > 0 " +
                         "AND item.reviewed_by_id = ? " +
                         "AND item.position > ? ";
     if(topics.length != 0){
