@@ -152,7 +152,7 @@ router.route('/search/:limit/:startId/:query?')
 router.route('/trending/:counter')
     .get(async (req: Request, res: Response) => {
         return res.json(
-            getTrendingItems()
+            await getTrendingItems()
         );
     })
 

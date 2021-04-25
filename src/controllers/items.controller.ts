@@ -693,9 +693,9 @@ sql +=                  "AND ( item.title LIKE ? OR item.description LIKE ? ) " 
     return rows;
 }
 
-export async function getTrendingItems():Promise<RowDataPacket[]>{
-    const sql = "select item.title, user_data.score from item inner join (select id, count(liked) + count(watched) as score from user_data group by id order by score desc) as user_data on item.id = user_data.id;";
-    const [rows] = await pool.query<RowDataPacket[]>(sql, []);
+export async function getTrendingItems(limit = 5):Promise<RowDataPacket[]>{
+    const sql = "select item.title, item.url, item.id, user_data.score from item inner join (select id, count(liked) + count(watched) as score from user_data group by id order by score desc) as user_data on item.id = user_data.id LIMIT ?;";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, [limit]);
     return rows;
 }
 
