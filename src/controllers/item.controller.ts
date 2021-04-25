@@ -4,7 +4,7 @@ import { UserData } from '../interface/userdata';
 import pool from '../lib/db';
 
 export async function addItem(item: Item): Promise<Item> {
-    const [rows] = await pool.query<ResultSetHeader>('INSERT INTO item SET explanation_id = ?, type_id = ?, url = ?, description = ?, title = ?, topic_id = ?, simple = ?, public=?, score = ?, readingDuration = ? ', [item.explanation_id, item.type.id, item.url, item.description, item.title, item.topic.id, item.simple, item.public, item.score, item.readingDuration]);
+    const [rows] = await pool.query<ResultSetHeader>('INSERT INTO item SET explanation_id = ?, type_id = ?, url = ?, description = ?, title = ?, topic_id = ?, simple = ?, public=?, score = ?, readingDuration = ?, language = ? ', [item.explanation_id, item.type.id, item.url, item.description, item.title, item.topic.id, item.simple, item.public, item.score, item.readingDuration, item.language.code]);
     item.id = rows.insertId;
     return item;
 }

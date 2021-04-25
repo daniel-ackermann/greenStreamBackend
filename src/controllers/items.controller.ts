@@ -476,7 +476,7 @@ export async function getItemsToReview(userId: number, limit:number, startId: nu
     if(!topics || !topics.length){
         topics = [];
     }
-    let queryData: (number|number[]|string[])[] = [userId, startId, limit];
+    let queryData: (number|number[]|string[])[] = [userId, userId, startId, limit];
     let sql = "SELECT    item.id, " +
                         "item.likes, " +
                         "item.marked, " +
@@ -511,13 +511,13 @@ export async function getItemsToReview(userId: number, limit:number, startId: nu
                         "FROM item " +
                         "INNER JOIN type ON type.id = item.type_id " +
                         "INNER JOIN topic ON topic.id = item.topic_id " +
-                        "INNER JOIN language ON language.code = item.language " +
+                        "INNER JOIN language ON language.code IN (SELECT language FROM user_languages WHERE user = ? ) AND language.code = item.language " +
                         "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
-                        "WHERE item.reviewed IS NULL " +
+                        "WHERE item.reviewed IS NULL OR item.reviewed = 0 " +
                         "AND item.id > ? ";
     if(topics.length != 0){
         sql +=          "AND item.topic_id IN (?) ";
-        queryData = [userId, startId, topics, limit];
+        queryData = [userId, userId, startId, topics, limit];
     }
     sql +=              "ORDER BY item.id " +
                         "LIMIT ? ";

@@ -1,12 +1,9 @@
+import { RowDataPacket } from "mysql2";
 import { Language } from "../interface/language";
+import pool from '../lib/db';
 
-export function getLanguages(): Language[] {
-    return [{
-        name: "Deutsch",
-        value: "de"
-    },
-    {
-        name: "English",
-        value: "en"
-    }];
+export async function getLanguages(): Promise<RowDataPacket[]> {
+    const sql = "select name, code from language";
+    const [rows] = await pool.query<RowDataPacket[]>(sql, []);
+    return rows;
 }

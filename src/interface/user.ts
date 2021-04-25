@@ -29,6 +29,6 @@ export interface UpdateUser {
 }
 
 export interface PublicUser {
-    username: string;
+    name: string;
     id: number;
 }
