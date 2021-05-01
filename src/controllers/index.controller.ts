@@ -90,7 +90,6 @@ export async function signIn(req: Request, res: Response): Promise<Response> {
 
         // bad, but the app needs the token.
         result.access_token = accessToken;
-        result.last_db_change = pool.getLastModified().getTime();
         return res.json(result);
     } else {
         return res.status(403).json("Username or password incorrect");
