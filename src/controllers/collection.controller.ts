@@ -38,7 +38,7 @@ export async function getCollection(id:number):Promise<RowDataPacket> {
 }
 
 
-export async function getCollectionItems(id: number, user: number, start: number, limit = 0): Promise<RowDataPacket[]> {
+export async function getCollectionItems(id: number, start: number, limit:number, user?: number): Promise<RowDataPacket[]> {
     const queryData =  [id, start, limit];
     let sql = "SELECT  item.title, " +
                         "item.url, " +
@@ -53,7 +53,7 @@ if(user !== undefined){
     queryData.unshift(user);
 }
 sql +=          "INNER JOIN collection_items ON (item.id = collection_items.item AND collection_items.collection = ? ) " +
-                "WHERE id > ? " +
+                "WHERE collection_items.item > ? " +
                 "ORDER BY collection_items.item " +
                 "LIMIT ? ";
     const [row] = await pool.query<RowDataPacket[]>(sql, queryData);

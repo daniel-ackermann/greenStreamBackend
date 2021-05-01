@@ -53,11 +53,11 @@ router.route('/:collection/items/:start/:limit')
             req.token = hasValidToken(req.cookies.jwt);
             if (req.cookies.jwt &&  req.token != false ) {
                 return res.json(
-                    await getCollectionItems(parseInt(req.params.id), parseInt(req.token.id), parseInt(req.params.start), parseInt(req.params.limit) )
+                    await getCollectionItems(parseInt(req.params.id), parseInt(req.params.start), parseInt(req.params.limit) || 0, parseInt(req.token.id)  )
                 );
             } else {
                 return res.json(
-                    await getCollectionItems(parseInt(req.params.id), parseInt(req.params.start), parseInt(req.params.limit) )
+                    await getCollectionItems(parseInt(req.params.id), parseInt(req.params.start), parseInt(req.params.limit) || 0 )
                 );
             }
         } catch (e) {
