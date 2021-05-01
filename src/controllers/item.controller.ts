@@ -50,9 +50,7 @@ export async function setItemStatus(user: number, item: number, type: string, va
     let sql = "SELECT * FROM user_data  WHERE user_id = ? AND id = ?;";
     const [result] = await pool.query<RowDataPacket[]>(sql, [user, item]);
     if (result.length > 0) {
-        console.log(result);
         result[0][type] = value;
-        console.log(result);
         if (result[0].liked === null && result[0].watchlist === null && result[0].watched === null) {
             // delete if not longer needed => all are NULL
             sql = "DELETE FROM user_data WHERE user_id = ? AND id = ?;";
@@ -73,55 +71,56 @@ export async function setItemStatus(user: number, item: number, type: string, va
             item,
             value
         ];
-        pool.query(sql, queryData);
+        await pool.query(sql, queryData);
     }
     return 200;
 }
 
 export async function getItemWithUserData(id: number, userId: number): Promise<RowDataPacket> {
-    const sql = "SELECT     item.id, " +
-        "item.likes, " +
-        "item.marked, " +
-        "item.explanation_id, " +
-        "item.url, " +
-        "item.description, " +
-        "item.title, " +
-        "item.simple, " +
-        "item.reviewed, " +
-        "item.public, " +
-        "item.score, " +
-        "item.readingDuration, " +
-        "JSON_OBJECT( " +
-            "'id', type.id, " +
-            "'name', type.name, " +
-            "'icon', type.icon, " +
-            "'view_external', type.view_external " +
-        " ) as type, " +
-        "JSON_OBJECT( " +
-            "'name', topic.name, " +
-            "'id', topic.id, " +
-            "'language', topic.language " +
-        " ) as topic, " +
-        "JSON_OBJECT( " +
-            "'code', language.code, " +
-            "'name', language.name " +
-        " ) as language, " +
-        "user_data.liked, " +
-        "user_data.watched, " +
-        "user_data.watchlist, " +
-        "user_data.last_recommended " +
-        "FROM item " +
-        "INNER JOIN type ON type.id = item.type_id " +
-        "INNER JOIN topic ON topic.id = item.topic_id " +
-        "INNER JOIN language ON language.code = item.language " +
-        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
-        "WHERE item.id=?;";
+    const sql = "SELECT      item.id, " +
+                            "item.likes, " +
+                            "item.marked, " +
+                            "item.explanation_id, " +
+                            "item.url, " +
+                            "item.description, " +
+                            "item.title, " +
+                            "item.simple, " +
+                            "item.reviewed, " +
+                            "item.public, " +
+                            "item.score, " +
+                            "item.readingDuration, " +
+                            "JSON_OBJECT( " +
+                                "'id', type.id, " +
+                                "'name', type.name, " +
+                                "'icon', type.icon, " +
+                                "'view_external', type.view_external " +
+                            " ) as type, " +
+                            "JSON_OBJECT( " +
+                                "'name', topic.name, " +
+                                "'id', topic.id, " +
+                                "'language', topic.language " +
+                            " ) as topic, " +
+                            "JSON_OBJECT( " +
+                                "'code', language.code, " +
+                                "'name', language.name " +
+                            " ) as language, " +
+                            "user_data.liked, " +
+                            "user_data.watched, " +
+                            "user_data.watchlist, " +
+                            "user_data.last_recommended " +
+                            "FROM item " +
+                            "INNER JOIN type        ON type.id       = item.type_id " +
+                            "INNER JOIN topic       ON topic.id      = item.topic_id " +
+                            "INNER JOIN language    ON language.code = item.language " +
+                            "LEFT JOIN user_data    ON user_data.id  = item.id " +
+                                                  "AND user_data.user_id = ? " +
+                            "WHERE item.id= ? ;";
     const [rows] = await pool.query<RowDataPacket[]>(sql, [userId, id]);
     return rows[0];
 }
 
-export async function getRecommendedItem(user: number): Promise<RowDataPacket>{
-    const sql = "SELECT  item.id, " +
+export async function getRecommendedItem(user?: number): Promise<RowDataPacket>{
+    let sql = "SELECT  item.id, " +
                         "item.likes, " +
                         "item.marked, " +
                         "item.explanation_id, " +
@@ -147,18 +146,25 @@ export async function getRecommendedItem(user: number): Promise<RowDataPacket>{
                         "JSON_OBJECT( " +
                             "'code', language.code, " +
                             "'name', language.name " +
-                        " ) as language, " +
-                        "user_data.liked, " +
+                        " ) as language ";
+if (user != undefined) {
+    sql +=              ", user_data.liked, " +
                         "user_data.watched, " +
                         "user_data.watchlist, " +
-                        "user_data.last_recommended " +
+                        "user_data.last_recommended ";
+}
                         "FROM item " +
                         "INNER JOIN type ON type.id = item.type_id " +
                         "INNER JOIN topic ON topic.id = item.topic_id " +
-                        "INNER JOIN language ON language.code = item.language " +
-                        "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
-                        "ORDER BY user_data.last_recommended, item.score + RAND() * 100 " +
-                        "LIMIT 1 ";
+                        "INNER JOIN language ON language.code = item.language ";
+if (user != undefined) {
+    sql +=              "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? " +
+                        "ORDER BY user_data.last_recommended, item.score + RAND() * 100 ";
+} else {
+    sql +=              "ORDER BY item.last_recommended, item.score + RAND() * 100 ";
+
+}
+sql +=                  "LIMIT 1 ";
     const [result] = await pool.query<RowDataPacket[]>(sql, [user]);
     return result[0];
 }
