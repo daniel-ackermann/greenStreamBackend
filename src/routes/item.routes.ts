@@ -49,9 +49,15 @@ router.route('/status/:type/:id')
     });
 
 router.route('/recommended')
-    .get(authenticate, async (req: Request, res: Response) => {
-        const item = await getRecommendedItem(req.token.id);
-        setItemStatus(req.token.id, item.id, "last_recommended", Math.floor(new Date().getTime() / 1000))
+    .get(async (req: Request, res: Response) => {
+        req.token = hasValidToken(req.cookies.jwt);
+        let item;
+        if (req.cookies.jwt && req.token != false) {
+            item = await getRecommendedItem(req.token.id);
+            setItemStatus(req.token.id, item.id, "last_recommended", Math.floor(new Date().getTime() / 1000))
+        } else {
+            item = await getRecommendedItem();
+        }
         return res.json(item);
     });
 
