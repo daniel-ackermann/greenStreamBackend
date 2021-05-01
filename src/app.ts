@@ -16,6 +16,8 @@ import UserRoutes from './routes/user.routes';
 import FeedbackRoutes from './routes/feedback.routes';
 import FeedbacksRoutes from './routes/feedbacks.routes';
 import LanguageRoutes from './routes/language.routes';
+import CollectionRoutes from './routes/collection.routes';
+import CollectionsRoutes from './routes/collections.routes';
 import { recalculateItemPositions } from './controllers/items.controller';
 import * as https from 'https';
 import compression from 'compression';
@@ -67,6 +69,8 @@ export class App {
         this.app.use("/api/feedback", FeedbackRoutes);
         this.app.use("/api/feedbacks", FeedbacksRoutes);
         this.app.use("/api/languages", LanguageRoutes);
+        this.app.use("/api/collection", CollectionRoutes);
+        this.app.use("/api/collections", CollectionsRoutes);
         this.app.all('/*', (req, res) => {
             res.sendFile('/index.html', { root: path.resolve(__dirname, '../html') });
         })
