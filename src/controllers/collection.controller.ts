@@ -49,7 +49,7 @@ if(user !== undefined){
 }
 sql +=                 "FROM item ";
 if(user !== undefined){
-    sql +=      "INNER JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? ";
+    sql +=      "LEFT JOIN user_data ON user_data.id = item.id AND user_data.user_id = ? ";
     queryData.unshift(user);
 }
 sql +=          "INNER JOIN collection_items ON (item.id = collection_items.item AND collection_items.collection = ? ) " +
