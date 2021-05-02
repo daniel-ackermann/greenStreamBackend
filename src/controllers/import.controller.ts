@@ -12,7 +12,7 @@ export async function importJSON(req: Request, res: Response): Promise<Response>
         if (item.explanation_id == 'N') {
             item.explanation_id = 0;
         }
-        const newItem = new Item(item.title, item.description, item.url, item.type, item.topic, item.language);
+        const newItem = new Item(item.title, item.description, item.url, item.type, item.topic, item.language, item.image);
         await addItem(newItem);
     }
     return res.json(200);

@@ -18,6 +18,7 @@ export async function getAllItems(lang?: string): Promise<RowDataPacket[]> {
                         "item.simple, " +
                         "item.reviewed, " +
                         "item.public, " +
+                        "item.image, " +
                         "item.readingDuration, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
@@ -63,6 +64,7 @@ export async function getItems(position:number, limit: number, lang = "", topics
                         "item.public, " +
                         "item.position, " +
                         "item.created_by_id, " +
+                        "item.image, " +
                         "item.readingDuration, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
@@ -111,6 +113,7 @@ export async function getItemsWithUserData(userId: number, position:number, limi
                         "item.public, " +
                         "item.position, " +
                         "item.created_by_id, " +
+                        "item.image, " +
                         "item.readingDuration, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
@@ -161,6 +164,7 @@ export async function getSuggestedItems(userId: number, position:number, limit: 
                         "item.public, " +
                         "item.position, " +
                         "item.created_by_id, " +
+                        "item.image, " +
                         "item.readingDuration, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
@@ -216,6 +220,7 @@ export async function getItemsByUser(userId: number, limit:number, startId: numb
                         "item.position, " +
                         "item.created_by_id, " +
                         "item.created, " +
+                        "item.image, " +
                         "item.readingDuration, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
@@ -280,6 +285,7 @@ export async function getLikedItems(userId: number, limit:number, startId: numbe
                         "item.public, " +
                         "item.position, " +
                         "item.created_by_id, " +
+                        "item.image, " +
                         "item.readingDuration, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
@@ -335,6 +341,7 @@ export async function getWatchedItems(userId: number, limit:number, startId: num
                         "item.public, " +
                         "item.position, " +
                         "item.created_by_id, " +
+                        "item.image, " +
                         "item.readingDuration, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
@@ -388,6 +395,7 @@ export async function getWatchListItems(userId: number, limit:number, startId: n
                         "item.public, " +
                         "item.position, " +
                         "item.created_by_id, " +
+                        "item.image, " +
                         "item.readingDuration, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
@@ -441,6 +449,7 @@ export async function getReviewedItemsByUser(userId: number, limit:number, start
                         "item.public, " +
                         "item.position, " +
                         "item.created_by_id, " +
+                        "item.image, " +
                         "item.readingDuration, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
@@ -496,6 +505,7 @@ export async function getItemsToReview(userId: number, limit:number, startId: nu
                         "item.public, " +
                         "item.position, " +
                         "item.created_by_id, " +
+                        "item.image, " +
                         "item.readingDuration, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
@@ -550,6 +560,7 @@ export async function getItemsWithFeedback(limit:number, position: number, topic
                         "item.public, " +
                         "item.position, " +
                         "item.created_by_id, " +
+                        "item.image, " +
                         "item.readingDuration, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
@@ -614,6 +625,7 @@ export async function getSearchResult(query: string, limit: number, position: nu
                         "item.public, " +
                         "item.position, " +
                         "item.created_by_id, " +
+                        "item.image, " +
                         "item.readingDuration, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +
@@ -664,6 +676,7 @@ export async function getSearchResultUser(query: string, limit: number, startId:
                         "item.public, " +
                         "item.position, " +
                         "item.created_by_id, " +
+                        "item.image, " +
                         "item.readingDuration, " +
                         "JSON_OBJECT( "+
                             "'id', type.id, " +

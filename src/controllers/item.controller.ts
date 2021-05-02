@@ -4,7 +4,7 @@ import { UserData } from '../interface/userdata';
 import pool from '../lib/db';
 
 export async function addItem(item: Item): Promise<Item> {
-    const [rows] = await pool.query<ResultSetHeader>('INSERT INTO item SET explanation_id = ?, type_id = ?, url = ?, description = ?, title = ?, topic_id = ?, simple = ?, public=?, score = ?, readingDuration = ?, language = ? ', [item.explanation_id, item.type.id, item.url, item.description, item.title, item.topic.id, item.simple, item.public, item.score, item.readingDuration, item.language.code]);
+    const [rows] = await pool.query<ResultSetHeader>('INSERT INTO item SET explanation_id = ?, type_id = ?, url = ?, description = ?, title = ?, topic_id = ?, simple = ?, public=?, score = ?, image = ?, readingDuration = ?, language = ? ', [item.explanation_id, item.type.id, item.url, item.description, item.title, item.topic.id, item.simple, item.public, item.score, item.image, item.readingDuration, item.language.code]);
     item.id = rows.insertId;
     return item;
 }
@@ -21,6 +21,7 @@ export async function getItem(id: number): Promise<RowDataPacket> {
         "item.reviewed, " +
         "item.public, " +
         "item.score, " +
+        "item.image, " +
         "item.readingDuration, " +
         "JSON_OBJECT( " +
             "'id', type.id, " +
@@ -88,6 +89,7 @@ export async function getItemWithUserData(id: number, userId: number): Promise<R
                             "item.reviewed, " +
                             "item.public, " +
                             "item.score, " +
+                            "item.image, " +
                             "item.readingDuration, " +
                             "JSON_OBJECT( " +
                                 "'id', type.id, " +
@@ -131,6 +133,7 @@ export async function getRecommendedItem(user?: number): Promise<RowDataPacket>{
                         "item.reviewed, " +
                         "item.public, " +
                         "item.score, " +
+                        "item.image, " +
                         "item.readingDuration, " +
                         "JSON_OBJECT( " +
                             "'id', type.id, " +
@@ -175,7 +178,7 @@ export async function deleteItem(id: number): Promise<ResultSetHeader> {
 }
 
 export async function updateItem(id: number, updateItem: Item): Promise<ResultSetHeader> {
-    const [result] = await pool.query<ResultSetHeader>('UPDATE item set explanation_id = ?, type_id = ?, url = ?, description = ?, title = ?, topic_id = ?, simple = ?, public=?, score = ?, readingDuration = ? WHERE id = ?', [updateItem.explanation_id, updateItem.type.id, updateItem.url, updateItem.description, updateItem.title, updateItem.topic.id, updateItem.simple, updateItem.public, updateItem.score, updateItem.readingDuration, id]);
+    const [result] = await pool.query<ResultSetHeader>('UPDATE item set explanation_id = ?, type_id = ?, url = ?, description = ?, title = ?, topic_id = ?, simple = ?, public=?, score = ?, image = ?, readingDuration = ? WHERE id = ?', [updateItem.explanation_id, updateItem.type.id, updateItem.url, updateItem.description, updateItem.title, updateItem.topic.id, updateItem.simple, updateItem.public, updateItem.score, updateItem.image, updateItem.readingDuration, id]);
     return result;
 }
 

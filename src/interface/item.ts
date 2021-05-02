@@ -3,13 +3,14 @@ import { Topic } from "./topic";
 import { Type } from "./type";
 
 export class Item {
-    constructor(title: string, description: string, url: string, type: Type, topic: Topic, language: Language){
+    constructor(title: string, description: string, url: string, type: Type, topic: Topic, language: Language, image: string){
         this.title = title;
         this.description = description;
         this.type = type;
         this.topic = topic;
         this.language = language;
         this.url = url;
+        this.image = image;
     }
     id?: number;
     likes = 0;
@@ -30,4 +31,5 @@ export class Item {
     created: number = Math.floor(new Date().getTime() / 1000);
     score = 100;
     readingDuration = 2;
+    image: string;
 }
