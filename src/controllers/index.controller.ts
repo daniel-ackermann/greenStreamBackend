@@ -57,7 +57,7 @@ export async function registerAccount(req: Request, res: Response): Promise<Resp
         console.log("Nutzer existiert bereits");
         return res.status(403).json("Account existiert bereits!");
     }
-    await pool.execute('INSERT INTO user (`username`, `password`, `email`, `role`) VALUES (?, ?, ?, ?);', [req.body.username, passwordHash.toString(), req.body.email, req.body.role]).catch(err => {
+    await pool.execute('INSERT INTO user (`username`, `password`, `email`, `role`) VALUES (?, ?, ?, "member");', [req.body.email.split('@')[0], passwordHash.toString(), req.body.email]).catch(err => {
         console.log(err);
     })
     return res.sendStatus(200);
