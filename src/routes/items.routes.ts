@@ -30,6 +30,7 @@ router.route('/review/:limit/:startId?')
                 await getItemsToReview(req.token.id, parseInt(req.params.limit), parseInt(req.params.startId), req.query.topics as string[])
             );
         } catch (e) {
+            console.error(e);
             return res.status(422).send();
         }
     })
@@ -133,6 +134,7 @@ router.route('/search/:limit/:startId/:query?')
                     result = await getSearchResultUser(req.params.query, parseInt(req.params.limit), parseInt(req.params.startId), req.query.topics as string[], parseInt(req.token.id), req.headers["accept-language"])
                 }
             } catch (e) {
+                console.error(e);
                 return res.status(422).json();
             }
         } else {
@@ -143,6 +145,7 @@ router.route('/search/:limit/:startId/:query?')
                     result = await getSearchResult(req.params.query, parseInt(req.params.limit), parseInt(req.params.startId), req.query.topics as string[], req.headers["accept-language"])
                 }
             } catch (e) {
+                console.error(e);
                 return res.status(422).send();
             }
         }

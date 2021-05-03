@@ -23,7 +23,7 @@ export async function addTopic(req: Request, res: Response): Promise<Response> {
 }
 
 export async function getTopics(language?: string): Promise<RowDataPacket[]> {
-    const languages = parseLanguage(language);
+    const languages = parseLanguage(language)[0];
     const sql = "SELECT  id, " +
         "name " +
         "FROM " +
