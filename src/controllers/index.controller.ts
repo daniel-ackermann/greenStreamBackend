@@ -75,23 +75,27 @@ export async function deleteAccount(email: string, token: cookieToken): Promise<
 
 export async function signIn(req: Request, res: Response): Promise<Response> {
     const user: UserWithPassword = req.body as UserWithPassword;
-    const rows = await getUserByEmailWithPassword(user.email) as any;
+    try {
+        const rows = await getUserByEmailWithPassword(user.email) as any;
+        if (await bcrypt.compare(user.password, rows.password)) {
+            const accessToken = jwt.sign({
+                email: user.email,
+                role: rows.role,
+                id: rows.id
+            }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: "6 hours" });
+            const expire = new Date(new Date().getTime() + 1000 * 60 * 60 * 6);
+            res.cookie('jwt', accessToken, { expires: expire, sameSite: "lax", secure: true, httpOnly: true });
+            const result: any = rows;
+            delete result.password;
     
-    if (await bcrypt.compare(user.password, rows.password)) {
-        const accessToken = jwt.sign({
-            email: user.email,
-            role: rows.role,
-            id: rows.id
-        }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: "6 hours" });
-        const expire = new Date(new Date().getTime() + 1000 * 60 * 60 * 6);
-        res.cookie('jwt', accessToken, { expires: expire, sameSite: "lax", secure: true, httpOnly: true });
-        const result: any = rows;
-        delete result.password;
-
-        // bad, but the app needs the token.
-        result.access_token = accessToken;
-        return res.json(result);
-    } else {
+            // bad, but the app needs the token.
+            result.access_token = accessToken;
+            return res.json(result);
+        } else {
+            return res.status(403).json("Username or password incorrect");
+        }
+    } catch (e) {
+        console.log(e);
         return res.status(403).json("Username or password incorrect");
     }
 }
