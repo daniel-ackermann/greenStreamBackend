@@ -122,6 +122,7 @@ export async function getItemWithUserData(id: number, userId: number): Promise<R
 }
 
 export async function getRecommendedItem(user?: number): Promise<RowDataPacket>{
+    const queryData = [];
     let sql = "SELECT  item.id, " +
                         "item.likes, " +
                         "item.marked, " +
@@ -151,6 +152,7 @@ export async function getRecommendedItem(user?: number): Promise<RowDataPacket>{
                             "'name', language.name " +
                         " ) as language ";
 if (user != undefined) {
+    queryData.push(user);
     sql +=              ", user_data.liked, " +
                         "user_data.watched, " +
                         "user_data.watchlist, " +
@@ -168,7 +170,7 @@ if (user != undefined) {
 
 }
 sql +=                  "LIMIT 1 ";
-    const [result] = await pool.query<RowDataPacket[]>(sql, [user]);
+    const [result] = await pool.query<RowDataPacket[]>(sql, queryData);
     return result[0];
 }
 
