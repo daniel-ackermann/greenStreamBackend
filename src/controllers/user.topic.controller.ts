@@ -27,7 +27,7 @@ export async function addUserTopic(user: number, topic: number):Promise<void> {
 }
 
 export async function removeUserTopics(user: number, topics: number[]):Promise<void> {
-    await pool.query("DELETE FROM user_topics WHERE user = ? AND topic IN ?;", [user, topics]);
+    await pool.query("DELETE FROM user_topics WHERE user = ? AND topic IN (?) ;", [user, topics]);
 }
 
 export async function removeUserTopic(user: number, topic: number):Promise<void> {

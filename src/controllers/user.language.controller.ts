@@ -27,7 +27,7 @@ export async function addUserLanguage(user: number, language: string):Promise<vo
 }
 
 export async function removeUserLanguages(user: number, languages: string[]):Promise<void> {
-    await pool.query("DELETE FROM user_languages WHERE user = ? AND language IN ?;", [user, languages]);
+    await pool.query("DELETE FROM user_languages WHERE user = ? AND language IN (?);", [user, languages]);
 }
 
 export async function removeUserLanguage(user: number, language: string):Promise<void> {
