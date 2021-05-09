@@ -74,14 +74,12 @@ export async function registerAccount(req: Request, res: Response): Promise<Resp
 export async function deleteAccount(email: string, token: cookieToken): Promise<boolean> {
     if (email == token.email || token.role == "admin") {
         const user = await getUserByEmail(token.email);
-        removeUserTopics(token.id, user.topics.map((topic:Topic) => {
+        await removeUserTopics(token.id, user.topics.map((topic:Topic) => {
             return topic.id;
         }));
-        const languages = user.languages.map( (lang:Language) => {
+        await removeUserLanguages(token.id, user.languages.map( (lang:Language) => {
             return lang.code;
-        });
-        console.log(languages);
-        removeUserLanguages(token.id, languages);
+        }));
         const [rows] = await (await pool.query<ResultSetHeader>('DELETE FROM user WHERE email = ?;', [token.email]));
         if (rows.affectedRows == 1) {
             return true;
