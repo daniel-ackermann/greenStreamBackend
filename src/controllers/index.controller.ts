@@ -18,6 +18,8 @@ import juice from 'juice';
 import { environment } from '../env/environment';
 import { removeUserTopics } from './user.topic.controller';
 import { removeUserLanguages } from './user.language.controller';
+import { Language } from '../interface/language';
+import { Topic } from '../interface/topic';
 
 
 // import pool from '../lib/db';
@@ -72,8 +74,12 @@ export async function registerAccount(req: Request, res: Response): Promise<Resp
 export async function deleteAccount(email: string, token: cookieToken): Promise<boolean> {
     if (email == token.email || token.role == "admin") {
         const user = await getUserByEmail(token.email);
-        removeUserTopics(token.id, user.topics);
-        removeUserLanguages(token.id, user.languages);
+        removeUserTopics(token.id, user.topics.filter((topic:Topic) => {
+            return topic.id;
+        }));
+        removeUserLanguages(token.id, user.languages.filter( (lang:Language) => {
+            return lang.code;
+        }));
         const [rows] = await (await pool.query<ResultSetHeader>('DELETE FROM user WHERE email = ?;', [token.email]));
         if (rows.affectedRows == 1) {
             return true;
