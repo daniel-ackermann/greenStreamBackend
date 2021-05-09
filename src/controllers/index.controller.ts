@@ -9,12 +9,13 @@ import 'dotenv/config'
 import pool from '../lib/db';
 import { hasValidToken } from '../middleware';
 import { cookieToken } from '../interface/cookieToken';
-import { getUserByEmail, getUserByEmailWithPassword } from './user.controller';
+import { getUserByEmail, getUserByEmailWithPassword, updateUserById } from './user.controller';
 import fs from 'fs';
 import { promisify } from 'util';
 import handlebars from 'handlebars';
 const readFile = promisify(fs.readFile);
 import juice from 'juice';
+import { environment } from '../env/environment';
 
 
 // import pool from '../lib/db';
@@ -57,9 +58,12 @@ export async function registerAccount(req: Request, res: Response): Promise<Resp
         console.log("Nutzer existiert bereits");
         return res.status(403).json("Account existiert bereits!");
     }
-    await pool.execute('INSERT INTO user (`username`, `password`, `email`, `role`) VALUES (?, ?, ?, "member");', [req.body.email.split('@')[0], passwordHash.toString(), req.body.email]).catch(err => {
-        console.log(err);
-    })
+    const [result] = await pool.query<ResultSetHeader>('INSERT INTO user (`username`, `password`, `email`, `role`) VALUES (?, ?, ?, "member");', [req.body.email.split('@')[0], passwordHash.toString(), req.body.email]);
+    updateUserById(result.insertId, {
+        id: result.insertId,
+        topics:environment.defaultTopics,
+        languages: environment.defaultLanguages 
+    });
     return res.sendStatus(200);
 }
 

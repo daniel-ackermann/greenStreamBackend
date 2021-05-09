@@ -77,10 +77,10 @@ export async function updateUser(id: string, user: User): Promise<void> {
 
 
 export async function updateUserById(id: number, user: UpdateUser): Promise<void> {
-    if(user.topics !== undefined){
+    if(user.topics && user.topics.length){
         updateUserTopics(id, user.topics);
     }
-    if(user.languages !== undefined){
+    if(user.languages && user.languages.length){
         updateUserLanguages(id, user.languages);
     }
     await pool.query('UPDATE user SET username = ? WHERE id = ?', [user.username, id]);
