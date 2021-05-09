@@ -83,5 +83,7 @@ export async function updateUserById(id: number, user: UpdateUser): Promise<void
     if(user.languages && user.languages.length){
         updateUserLanguages(id, user.languages);
     }
-    await pool.query('UPDATE user SET username = ? WHERE id = ?', [user.username, id]);
+    if(user.username){
+        await pool.query('UPDATE user SET username = ? WHERE id = ?', [user.username, id]);
+    }
 }
