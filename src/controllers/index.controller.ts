@@ -77,9 +77,11 @@ export async function deleteAccount(email: string, token: cookieToken): Promise<
         removeUserTopics(token.id, user.topics.filter((topic:Topic) => {
             return topic.id;
         }));
-        removeUserLanguages(token.id, user.languages.filter( (lang:Language) => {
+        const languages = user.languages.filter( (lang:Language) => {
             return lang.code;
-        }));
+        });
+        console.log(languages);
+        removeUserLanguages(token.id, languages);
         const [rows] = await (await pool.query<ResultSetHeader>('DELETE FROM user WHERE email = ?;', [token.email]));
         if (rows.affectedRows == 1) {
             return true;
