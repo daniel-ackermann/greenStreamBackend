@@ -158,7 +158,7 @@ if (user != undefined) {
                         "user_data.watchlist, " +
                         "user_data.last_recommended ";
 }
-                        "FROM item " +
+sql +=                  "FROM item " +
                         "INNER JOIN type ON type.id = item.type_id " +
                         "INNER JOIN topic ON topic.id = item.topic_id " +
                         "INNER JOIN language ON language.code = item.language ";
